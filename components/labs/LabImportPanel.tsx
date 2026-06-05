@@ -13,6 +13,8 @@ import {
   parseRowsIntoLabData,
 } from "@/lib/lab-utils";
 import { FileSpreadsheet, FileText, Loader2, Save, Upload, WandSparkles } from "lucide-react";
+import * as XLSX from "xlsx";
+import * as pdfjsLib from "pdfjs-dist";
 
 const MANUAL_KEYS = [
   "creatinine",
@@ -26,11 +28,11 @@ const MANUAL_KEYS = [
 ] as const;
 
 async function loadXlsxClient() {
-  return import(/* webpackIgnore: true */ "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm");
+  return XLSX;
 }
 
 async function loadPdfJsClient() {
-  return import(/* webpackIgnore: true */ "https://cdn.jsdelivr.net/npm/pdfjs-dist@5.6.205/build/pdf.min.mjs");
+  return pdfjsLib;
 }
 
 type Mode = "paste" | "file" | "manual";
