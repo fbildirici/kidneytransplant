@@ -1,0 +1,181 @@
+import type { LabDataPoint, LabImportSource, LabMetricKey } from "@/lib/store";
+
+const METRIC_ALIASES: Record<LabMetricKey, string[]> = {
+  creatinine: ["kreatinin", "creatinine", "serum kreatinin"],
+  urea: ["ure", "üre", "urea", "blood urea"],
+  uricAcid: ["urik asit", "ürik asit", "uric acid"],
+  gfr: ["gfr", "egfr", "e-gfr", "glomeruler filtrasyon", "glomerüler filtrasyon"],
+  urineProtein: ["idrarda protein", "proteinuri", "proteinüri", "urine protein"],
+  urineCreatinine: ["idrarda kreatinin", "urine creatinine", "idrar kreatinin"],
+  spotUrine: ["spot idrar", "protein/kreatinin", "protein kreatinin", "spot urine"],
+  tacrolimus: ["tacrolimus", "takrolimus", "fk506"],
+  hemoglobin: ["hemoglobin", "hgb", "hb"],
+  potassium: ["potasyum", "potassium", "k+"],
+  sodium: ["sodyum", "sodium", "na+"],
+  phosphorus: ["fosfor", "phosphorus", "phosphate"],
+  albumin: ["albumin", "albümin"],
+  crp: ["crp", "c-reaktif protein", "c reaktif protein"],
+};
+
+const DATE_PATTERNS = [
+  /(\d{4})[-/.](\d{2})[-/.](\d{2})/,
+  /(\d{2})[-/.](\d{2})[-/.](\d{4})/,
+];
+
+function parseNumber(raw: string): number | undefined {
+  const match = raw.replace(",", ".").match(/-?\d+(?:\.\d+)?/);
+  if (!match) return undefined;
+  const value = Number(match[0]);
+  return Number.isFinite(value) ? value : undefined;
+}
+
+export function normalizeDateInput(raw: string): string | null {
+  const text = raw.trim();
+  if (!text) return null;
+
+  const iso = text.match(DATE_PATTERNS[0]);
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+
+  const local = text.match(DATE_PATTERNS[1]);
+  if (local) return `${local[3]}-${local[2]}-${local[1]}`;
+
+  if (/^\d{4}-\d{2}$/.test(text)) return text;
+
+  return null;
+}
+
+export function extractFirstDate(text: string): string | null {
+  for (const line of text.split(/\r?\n/)) {
+    const normalized = normalizeDateInput(line);
+    if (normalized) return normalized;
+  }
+  return null;
+}
+
+export function extractLabValuesFromText(text: string): Partial<LabDataPoint> {
+  const lower = text.toLocaleLowerCase("tr-TR");
+  const values: Partial<LabDataPoint> = {};
+
+  (Object.keys(METRIC_ALIASES) as LabMetricKey[]).forEach((metricKey) => {
+    const aliases = METRIC_ALIASES[metricKey];
+
+    for (const alias of aliases) {
+      const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const lineRegex = new RegExp(`${escaped}[^\\d-]{0,15}(-?\\d+[,.]?\\d*)`, "i");
+      const lineMatch = lower.match(lineRegex);
+      if (lineMatch?.[1]) {
+        const value = parseNumber(lineMatch[1]);
+        if (value !== undefined) {
+          values[metricKey] = value;
+          return;
+        }
+      }
+    }
+
+    for (const line of lower.split(/\r?\n/)) {
+      if (!aliases.some((alias) => line.includes(alias))) continue;
+      const value = parseNumber(line);
+      if (value !== undefined) {
+        values[metricKey] = value;
+        break;
+      }
+    }
+  });
+
+  return values;
+}
+
+function normalizeHeader(header: string): string {
+  return header
+    .toLocaleLowerCase("tr-TR")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function mapHeaderToMetric(header: string): LabMetricKey | null {
+  const normalized = normalizeHeader(header);
+  const direct = (Object.keys(METRIC_ALIASES) as LabMetricKey[]).find((metricKey) =>
+    METRIC_ALIASES[metricKey].some((alias) => normalized.includes(alias))
+  );
+  return direct ?? null;
+}
+
+function getRowDate(row: Record<string, unknown>): string | null {
+  const candidate = Object.entries(row).find(([key]) =>
+    ["date", "tarih", "report date", "lab date"].includes(normalizeHeader(key))
+  );
+  if (!candidate) return null;
+  return normalizeDateInput(String(candidate[1] ?? ""));
+}
+
+export function parseRowsIntoLabData(
+  rows: Record<string, unknown>[],
+  fallbackDate: string,
+  sourceType: LabImportSource
+): LabDataPoint[] {
+  const parsedRows = rows
+    .map((row, index) => {
+      const point: LabDataPoint = {
+        date: getRowDate(row) ?? fallbackDate,
+        sourceType,
+      };
+
+      Object.entries(row).forEach(([key, rawValue]) => {
+        const metricKey = mapHeaderToMetric(key);
+        if (!metricKey) return;
+        const value = parseNumber(String(rawValue ?? ""));
+        if (value !== undefined) point[metricKey] = value;
+      });
+
+      const hasMetric = Object.keys(point).some((key) => key !== "date" && key !== "sourceType");
+      return hasMetric ? { ...point, sourceLabel: `Satir ${index + 1}` } : null;
+    })
+    .filter((point): point is LabDataPoint => point !== null);
+
+  return parsedRows;
+}
+
+export function parseDelimitedLabText(
+  rawText: string,
+  fallbackDate: string,
+  sourceType: LabImportSource
+): LabDataPoint[] {
+  const lines = rawText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length < 2) return [];
+
+  const delimiter = lines[0].includes("\t") ? "\t" : lines[0].includes(";") ? ";" : ",";
+  const headers = lines[0].split(delimiter).map((header) => header.trim());
+  const rows = lines.slice(1).map((line) => {
+    const values = line.split(delimiter);
+    return headers.reduce<Record<string, unknown>>((acc, header, index) => {
+      acc[header] = values[index] ?? "";
+      return acc;
+    }, {});
+  });
+
+  return parseRowsIntoLabData(rows, fallbackDate, sourceType);
+}
+
+export function buildSingleLabPoint(
+  rawText: string,
+  fallbackDate: string,
+  sourceType: LabImportSource,
+  meta?: Partial<LabDataPoint>
+): LabDataPoint | null {
+  const values = extractLabValuesFromText(rawText);
+  const hasValues = Object.keys(values).length > 0;
+
+  if (!hasValues) return null;
+
+  return {
+    date: extractFirstDate(rawText) ?? fallbackDate,
+    sourceType,
+    rawText,
+    ...values,
+    ...meta,
+  };
+}
