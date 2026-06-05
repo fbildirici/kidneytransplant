@@ -20,7 +20,7 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
   {
     id: "1",
     icon: Pill,
-    iconBg: "bg-navy-100",
+    iconBg: "bg-navy-50",
     iconColor: "text-navy-600",
     title: "İlaç Hatırlatması",
     desc: "Tacrolimus 2mg — Saat 20:00 dozunu almayı unutmayın.",
@@ -30,8 +30,8 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
   {
     id: "2",
     icon: MessageSquare,
-    iconBg: "bg-emerald-100",
-    iconColor: "text-emerald-600",
+    iconBg: "bg-success-50",
+    iconColor: "text-success-600",
     title: "Doktor Yanıtladı",
     desc: "Dr. Ayşe Kaya tacrolimus seviyeniz hakkındaki mesajınızı yanıtladı.",
     time: "1 saat önce",
@@ -40,18 +40,18 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
   {
     id: "3",
     icon: Calendar,
-    iconBg: "bg-teal-100",
-    iconColor: "text-teal-600",
+    iconBg: "bg-medical-50",
+    iconColor: "text-medical-600",
     title: "Yaklaşan Randevu",
-    desc: "Dr. Ayşe Kaya ile yarın 10:00'da randevunuz var. Hazırlıklı olun.",
+    desc: "Dr. Ayşe Kaya ile yarın 10:00'da randevunuz var.",
     time: "2 saat önce",
     read: false,
   },
   {
     id: "4",
     icon: TrendingUp,
-    iconBg: "bg-violet-100",
-    iconColor: "text-violet-600",
+    iconBg: "bg-info-50",
+    iconColor: "text-info-600",
     title: "Lab Sonuçları Güncellendi",
     desc: "Kreatinin değeriniz güncellendi: 1.2 mg/dL — Normal aralıkta.",
     time: "Dün",
@@ -60,10 +60,10 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
   {
     id: "5",
     icon: Activity,
-    iconBg: "bg-cyan-100",
-    iconColor: "text-cyan-600",
+    iconBg: "bg-warning-50",
+    iconColor: "text-warning-600",
     title: "Haftalık İlaç Uyum Raporu",
-    desc: "Bu hafta %94 ilaç uyumu sağladınız. Harika gidiyorsunuz!",
+    desc: "Bu hafta %94 ilaç uyumu sağladınız.",
     time: "2 gün önce",
     read: true,
   },
@@ -78,7 +78,6 @@ export default function Header() {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // Close panel on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (
@@ -94,7 +93,6 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Close panel on Esc
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") setNotifOpen(false);
@@ -119,30 +117,26 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 glass border-b border-slate-200/50 shadow-[0_1px_8px_-4px_rgba(0,48,128,0.07)]">
-        <div className="flex items-center justify-between px-4 lg:px-7 py-3 gap-4">
-
+      <header className="sticky top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-border">
+        <div className="flex items-center justify-between px-4 lg:px-6 py-3 gap-4">
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer flex-shrink-0"
+            className="lg:hidden p-2 rounded-[var(--radius-md)] text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-colors cursor-pointer flex-shrink-0"
             aria-label="Menüyü aç"
           >
-            <Menu size={21} />
+            <Menu size={20} />
           </button>
 
           {/* Search */}
-          <div className="flex items-center gap-2.5 bg-slate-50 rounded-xl px-3.5 py-2.5 flex-1 max-w-sm border border-slate-200/70 focus-within:border-navy-300 focus-within:ring-2 focus-within:ring-navy-500/10 transition-all group">
-            <Search size={16} className="text-slate-400 flex-shrink-0 group-focus-within:text-navy-500 transition-colors" />
+          <div className="flex items-center gap-2.5 bg-surface-muted rounded-[var(--radius-lg)] px-3.5 py-2 flex-1 max-w-sm border border-border focus-within:border-border-strong focus-within:ring-[3px] focus-within:ring-navy-500/10 transition-all group">
+            <Search size={16} className="text-text-tertiary flex-shrink-0 group-focus-within:text-navy-500 transition-colors" />
             <input
               type="text"
               placeholder="Ara..."
-              className="bg-transparent text-sm text-slate-600 placeholder:text-slate-400 focus:outline-none w-full"
+              className="bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none w-full"
               aria-label="Ara"
             />
-            <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] text-slate-400 bg-white border border-slate-200 rounded px-1.5 py-0.5 font-mono flex-shrink-0">
-              ⌘K
-            </kbd>
           </div>
 
           {/* Right section */}
@@ -152,10 +146,10 @@ export default function Header() {
               <button
                 ref={bellRef}
                 onClick={() => setNotifOpen((v) => !v)}
-                className={`relative p-2.5 rounded-xl transition-colors cursor-pointer ${
+                className={`relative p-2 rounded-[var(--radius-md)] transition-colors cursor-pointer ${
                   notifOpen
                     ? "bg-navy-50 text-navy-600"
-                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                    : "text-text-secondary hover:bg-surface-muted hover:text-text-primary"
                 }`}
                 aria-label="Bildirimler"
                 aria-expanded={notifOpen}
@@ -163,8 +157,8 @@ export default function Header() {
               >
                 <Bell size={19} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] bg-red-500 rounded-full border-2 border-white flex items-center justify-center">
-                    <span className="text-[9px] font-black text-white leading-none">{unreadCount}</span>
+                  <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 bg-danger-500 rounded-full border-2 border-surface flex items-center justify-center">
+                    <span className="text-[9px] font-bold text-white leading-none">{unreadCount}</span>
                   </span>
                 )}
               </button>
@@ -173,25 +167,22 @@ export default function Header() {
               {notifOpen && (
                 <div
                   ref={panelRef}
-                  className="absolute right-0 top-full mt-2 w-[min(92vw,360px)] bg-white rounded-2xl shadow-2xl shadow-slate-200/80 border border-slate-100 overflow-hidden z-50 animate-scale-in"
+                  className="absolute right-0 top-full mt-2 w-[min(92vw,360px)] bg-surface rounded-[var(--radius-xl)] shadow-popover border border-border overflow-hidden z-50 animate-scale-in"
                 >
-                  {/* Panel header */}
-                  <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-navy-50 flex items-center justify-center">
-                        <Bell size={15} className="text-navy-500" />
-                      </div>
+                  <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
+                    <div className="flex items-center gap-2">
+                      <Bell size={15} className="text-text-secondary" />
                       <div>
-                        <p className="text-sm font-bold text-slate-900">Bildirimler</p>
+                        <p className="text-sm font-semibold text-text-primary">Bildirimler</p>
                         {unreadCount > 0 && (
-                          <p className="text-[11px] text-slate-400">{unreadCount} okunmamış</p>
+                          <p className="text-[11px] text-text-tertiary">{unreadCount} okunmamış</p>
                         )}
                       </div>
                     </div>
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllRead}
-                        className="flex items-center gap-1 text-xs font-semibold text-teal-600 hover:text-teal-700 transition-colors cursor-pointer"
+                        className="flex items-center gap-1 text-xs font-medium text-navy-600 hover:text-navy-700 transition-colors cursor-pointer"
                       >
                         <CheckCircle size={12} />
                         Tümünü oku
@@ -199,47 +190,41 @@ export default function Header() {
                     )}
                   </div>
 
-                  {/* Notification list */}
-                  <div className="max-h-[420px] overflow-y-auto divide-y divide-slate-50">
+                  <div className="max-h-[380px] overflow-y-auto divide-y divide-border-subtle">
                     {notifications.length === 0 ? (
-                      <div className="py-12 text-center">
-                        <Bell size={28} className="mx-auto text-slate-300 mb-2" />
-                        <p className="text-sm text-slate-400">Tüm bildirimler okundu</p>
+                      <div className="py-10 text-center">
+                        <Bell size={24} className="mx-auto text-text-muted mb-2" />
+                        <p className="text-sm text-text-tertiary">Tüm bildirimler okundu</p>
                       </div>
                     ) : (
                       notifications.map((notif) => (
                         <div
                           key={notif.id}
                           onClick={() => markRead(notif.id)}
-                          className={`flex items-start gap-3.5 px-5 py-4 transition-colors cursor-pointer group ${
+                          className={`flex items-start gap-3 px-5 py-3.5 transition-colors cursor-pointer group ${
                             notif.read
-                              ? "hover:bg-slate-50/70"
-                              : "bg-navy-50/40 hover:bg-navy-50/70"
+                              ? "hover:bg-surface-muted"
+                              : "bg-navy-50/30 hover:bg-navy-50/50"
                           }`}
                         >
-                          {/* Icon */}
-                          <div className={`w-9 h-9 rounded-xl ${notif.iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                            <notif.icon size={16} className={notif.iconColor} />
+                          <div className={`w-8 h-8 rounded-[var(--radius-md)] ${notif.iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                            <notif.icon size={15} className={notif.iconColor} />
                           </div>
-
-                          {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
-                              <p className={`text-sm leading-tight ${notif.read ? "font-medium text-slate-700" : "font-bold text-slate-900"}`}>
+                              <p className={`text-sm leading-tight ${notif.read ? "font-medium text-text-primary" : "font-semibold text-text-primary"}`}>
                                 {notif.title}
                               </p>
                               <button
                                 onClick={(e) => { e.stopPropagation(); dismiss(notif.id); }}
-                                className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-slate-300 hover:text-slate-500 transition-all cursor-pointer flex-shrink-0"
+                                className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-text-muted hover:text-text-secondary transition-all cursor-pointer flex-shrink-0"
                               >
                                 <X size={13} />
                               </button>
                             </div>
-                            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{notif.desc}</p>
-                            <p className="text-[10px] text-slate-400 mt-1.5 font-medium">{notif.time}</p>
+                            <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">{notif.desc}</p>
+                            <p className="text-[10px] text-text-muted mt-1 font-medium">{notif.time}</p>
                           </div>
-
-                          {/* Unread dot */}
                           {!notif.read && (
                             <div className="w-2 h-2 rounded-full bg-navy-500 flex-shrink-0 mt-2" />
                           )}
@@ -248,14 +233,13 @@ export default function Header() {
                     )}
                   </div>
 
-                  {/* Panel footer */}
                   {notifications.length > 0 && (
-                    <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50">
+                    <div className="px-5 py-2.5 border-t border-border bg-surface-muted">
                       <button
                         onClick={() => setNotifications([])}
-                        className="text-xs text-slate-400 hover:text-slate-600 font-medium transition-colors cursor-pointer w-full text-center"
+                        className="text-xs text-text-tertiary hover:text-text-secondary font-medium transition-colors cursor-pointer w-full text-center"
                       >
-                        Tüm bildirimleri temizle
+                        Tümünü temizle
                       </button>
                     </div>
                   )}
@@ -264,14 +248,14 @@ export default function Header() {
             </div>
 
             {/* User info */}
-            <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-slate-200">
+            <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-border">
               <div className="text-right">
-                <p className="text-sm font-semibold text-slate-700 leading-tight">Ahmet Yılmaz</p>
-                <p className="text-[11px] text-slate-400 leading-tight">Nakil Hastası</p>
+                <p className="text-sm font-medium text-text-primary leading-tight">Ahmet Y.</p>
+                <p className="text-[11px] text-text-tertiary leading-tight">Hasta</p>
               </div>
               <div className="relative">
                 <Avatar name="Ahmet Yılmaz" size="md" />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success-500 rounded-full border-2 border-surface" />
               </div>
             </div>
           </div>

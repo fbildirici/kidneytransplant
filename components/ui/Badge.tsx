@@ -10,12 +10,12 @@ export default function Badge({ children, variant = "default", className }: Badg
   return (
     <span
       className={cn(
-        "inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold",
-        variant === "default" && "bg-slate-100 text-slate-600",
-        variant === "success" && "bg-emerald-100 text-emerald-700",
-        variant === "warning" && "bg-amber-100 text-amber-700",
-        variant === "danger" && "bg-red-100 text-red-700",
-        variant === "info" && "bg-teal-100 text-teal-700",
+        "inline-flex items-center px-2 py-0.5 rounded-[var(--radius-md)] text-[11px] font-semibold tracking-wide",
+        variant === "default" && "bg-surface-muted text-text-secondary border border-border",
+        variant === "success" && "bg-success-100 text-success-700",
+        variant === "warning" && "bg-warning-100 text-warning-700",
+        variant === "danger" && "bg-danger-100 text-danger-700",
+        variant === "info" && "bg-info-100 text-info-700",
         className
       )}
     >

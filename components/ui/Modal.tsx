@@ -25,20 +25,27 @@ export default function Modal({ isOpen, onClose, title, children, size = "md" }:
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/45 backdrop-blur-[6px]" onClick={onClose} />
+      <div
+        className="fixed inset-0 bg-black/40"
+        onClick={onClose}
+        aria-hidden="true"
+      />
       <div
         className={cn(
-          "relative bg-white rounded-3xl shadow-[0_24px_64px_-16px_rgba(0,0,0,0.25)] w-full animate-scale-in max-h-[90vh] overflow-y-auto border border-slate-200/60",
+          "relative bg-surface rounded-[var(--radius-2xl)] shadow-popover w-full animate-scale-in max-h-[90vh] overflow-y-auto border border-border",
           size === "sm" && "max-w-sm",
           size === "md" && "max-w-lg",
           size === "lg" && "max-w-2xl"
         )}
+        role="dialog"
+        aria-modal="true"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="text-base font-bold text-slate-900">{title}</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h2 className="text-base font-semibold text-text-primary">{title}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-[var(--radius-md)] flex items-center justify-center text-text-tertiary hover:text-text-secondary hover:bg-surface-muted transition-colors cursor-pointer"
+            aria-label="Kapat"
           >
             <X size={17} />
           </button>

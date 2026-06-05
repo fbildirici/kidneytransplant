@@ -10,11 +10,11 @@ export default function Card({ className, hover = false, padding = "md", childre
   return (
     <div
       className={cn(
-        "bg-white rounded-2xl border border-slate-200/70 shadow-[0_1px_4px_-2px_rgba(0,0,0,0.06),0_4px_12px_-6px_rgba(0,48,128,0.07)]",
-        hover && "card-hover cursor-pointer",
+        "bg-surface rounded-[var(--radius-xl)] border border-border shadow-card transition-all duration-200",
+        hover && "cursor-pointer hover:shadow-elevated hover:border-border-strong",
         padding === "sm" && "p-4",
-        padding === "md" && "p-6",
-        padding === "lg" && "p-8",
+        padding === "md" && "p-5",
+        padding === "lg" && "p-6",
         className
       )}
       {...props}
