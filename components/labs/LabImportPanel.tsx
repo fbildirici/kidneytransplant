@@ -14,7 +14,6 @@ import {
 } from "@/lib/lab-utils";
 import { FileSpreadsheet, FileText, Loader2, Save, Upload, WandSparkles } from "lucide-react";
 import * as XLSX from "xlsx";
-import * as pdfjsLib from "pdfjs-dist";
 
 const MANUAL_KEYS = [
   "creatinine",
@@ -32,7 +31,8 @@ async function loadXlsxClient() {
 }
 
 async function loadPdfJsClient() {
-  return pdfjsLib;
+  const pdfjs = await import("pdfjs-dist");
+  return pdfjs;
 }
 
 type Mode = "paste" | "file" | "manual";
