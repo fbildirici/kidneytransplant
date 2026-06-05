@@ -62,34 +62,22 @@ export default function DashboardPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
 
       {/* ===== WELCOME BANNER ===== */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy-600 via-navy-500 to-teal-600 p-6 sm:p-7 text-white shadow-xl shadow-navy-500/20">
-        {/* Decorative blobs */}
-        <div className="absolute -right-10 -top-10 w-52 h-52 bg-white/5 rounded-full blur-2xl" />
-        <div className="absolute right-1/3 bottom-0 w-40 h-40 bg-teal-400/10 rounded-full blur-2xl" />
-        <div className="absolute inset-0 dot-pattern opacity-10" />
-
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-surface rounded-[var(--radius-xl)] border border-border p-5 sm:p-6 shadow-card">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={15} className="text-teal-300" />
-              <span className="text-teal-300 text-sm font-semibold">Hoş Geldiniz</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white mb-1.5">
-              {getGreeting()}, Ahmet! 👋
+            <p className="text-xs font-medium text-text-tertiary mb-1 uppercase tracking-wide">
+              {getGreeting()}
+            </p>
+            <h1 className="text-xl sm:text-2xl font-semibold text-text-primary mb-1">
+              Bugün takip etmeniz gerekenler
             </h1>
-            <p className="text-white/60 text-sm">
-              Bugün sağlığınız için neler yapabileceğinize bakalım.
+            <p className="text-sm text-text-secondary">
+              İlaç programınızı kontrol edin, yaklaşan randevularınıza ve mesajlarınıza göz atın.
             </p>
           </div>
-          <div className="flex gap-2.5 flex-shrink-0">
-            <Link href="/ai-assistant">
-              <button className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white/15 hover:bg-white/25 rounded-xl text-sm font-semibold text-white transition-colors border border-white/15">
-                <Bot size={15} />
-                AI&apos;a Sor
-              </button>
-            </Link>
+          <div className="flex gap-2 flex-shrink-0">
             <Link href="/medications">
-              <button className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white text-navy-700 hover:bg-white/92 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-navy-900/15">
+              <button className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-navy-600 text-white hover:bg-navy-700 rounded-[var(--radius-md)] text-sm font-medium transition-colors shadow-subtle">
                 <Plus size={15} />
                 İlaç Ekle
               </button>
@@ -239,13 +227,14 @@ export default function DashboardPage() {
           <div className="divide-y divide-slate-50">
             {medications.length === 0 && (
               <div className="flex flex-col items-center justify-center py-12 text-center px-5">
-                <div className="w-14 h-14 rounded-2xl bg-navy-50 flex items-center justify-center mb-3">
-                  <Pill size={24} className="text-navy-300" />
+                <div className="w-12 h-12 rounded-[var(--radius-lg)] bg-surface-muted flex items-center justify-center mb-3">
+                  <Pill size={22} className="text-text-muted" />
                 </div>
-                <p className="text-sm font-semibold text-slate-500 mb-1">İlaç bulunamadı</p>
-                <p className="text-xs text-slate-400 mb-4">Doktorunuz ilaçlarınızı ekleyince burada görünecek.</p>
-                <Link href="/medications" className="text-xs font-semibold text-navy-500 hover:text-navy-700 transition-colors">
-                  İlaç Yönetimine Git →
+                <p className="text-sm font-semibold text-text-primary mb-1">Henüz ilaç programınız oluşturulmadı</p>
+                <p className="text-xs text-text-secondary mb-4 max-w-xs">İlk ilacınızı ekleyebilir veya doktorunuzdan ilaç listenizi paylaşmasını isteyebilirsiniz.</p>
+                <Link href="/medications" className="inline-flex items-center gap-1 text-xs font-semibold text-navy-600 hover:text-navy-700 transition-colors">
+                  İlaç Yönetimine Git
+                  <ArrowRight size={12} />
                 </Link>
               </div>
             )}
@@ -300,45 +289,58 @@ export default function DashboardPage() {
         <div className="space-y-5">
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-2xl border border-slate-200/70 shadow-[0_1px_4px_-2px_rgba(0,0,0,0.06),0_4px_12px_-6px_rgba(0,48,128,0.07)] p-5">
-            <h2 className="font-bold text-slate-900 text-sm mb-4">Hızlı İşlemler</h2>
+          <div className="bg-surface rounded-[var(--radius-xl)] border border-border shadow-card p-5">
+            <h2 className="font-semibold text-text-primary text-sm mb-4">Hızlı İşlemler</h2>
             <div className="space-y-2">
-              <Link href="/ai-assistant" className="block">
-                <div className="flex items-center gap-3 p-3.5 rounded-xl bg-navy-50 hover:bg-navy-100 transition-colors group border border-navy-100/50">
-                  <div className="w-10 h-10 rounded-xl bg-navy-500 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm shadow-navy-500/20 flex-shrink-0">
-                    <Bot className="text-white" size={18} />
+              <Link href="/medications" className="block">
+                <div className="flex items-center gap-3 p-3 rounded-[var(--radius-lg)] bg-navy-50 hover:bg-navy-100 transition-colors group border border-navy-100">
+                  <div className="w-9 h-9 rounded-[var(--radius-md)] bg-navy-600 flex items-center justify-center flex-shrink-0">
+                    <Pill className="text-white" size={16} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">AI Asistana Sor</p>
-                    <p className="text-xs text-slate-400 truncate">Sağlık sorularınızı sorun</p>
+                    <p className="text-sm font-semibold text-text-primary">İlaçlarımı Yönet</p>
+                    <p className="text-xs text-text-tertiary truncate">Programı görüntüle ve doz işaretle</p>
                   </div>
-                  <ChevronRight size={15} className="text-slate-300 ml-auto group-hover:text-navy-400 transition-colors flex-shrink-0" />
+                  <ChevronRight size={14} className="text-text-muted ml-auto group-hover:text-navy-500 transition-colors flex-shrink-0" />
                 </div>
               </Link>
 
               <Link href="/messages" className="block">
-                <div className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors group border border-emerald-100/50">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm shadow-emerald-500/20 flex-shrink-0">
-                    <MessageSquare className="text-white" size={18} />
+                <div className="flex items-center gap-3 p-3 rounded-[var(--radius-lg)] bg-surface-muted hover:bg-surface-subtle transition-colors group border border-border">
+                  <div className="w-9 h-9 rounded-[var(--radius-md)] bg-success-500 flex items-center justify-center flex-shrink-0">
+                    <MessageSquare className="text-white" size={16} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">Doktora Mesaj</p>
-                    <p className="text-xs text-slate-400 truncate">Endişelerinizi paylaşın</p>
+                    <p className="text-sm font-semibold text-text-primary">Doktora Mesaj Gönder</p>
+                    <p className="text-xs text-text-tertiary truncate">Endişelerinizi ve sorularınızı paylaşın</p>
                   </div>
-                  <ChevronRight size={15} className="text-slate-300 ml-auto group-hover:text-emerald-400 transition-colors flex-shrink-0" />
+                  <ChevronRight size={14} className="text-text-muted ml-auto group-hover:text-success-500 transition-colors flex-shrink-0" />
+                </div>
+              </Link>
+
+              <Link href="/labs" className="block">
+                <div className="flex items-center gap-3 p-3 rounded-[var(--radius-lg)] bg-surface-muted hover:bg-surface-subtle transition-colors group border border-border">
+                  <div className="w-9 h-9 rounded-[var(--radius-md)] bg-info-500 flex items-center justify-center flex-shrink-0">
+                    <Activity className="text-white" size={16} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-text-primary">Lab Sonucu Yükle</p>
+                    <p className="text-xs text-text-tertiary truncate">PDF, Excel veya manuel giriş</p>
+                  </div>
+                  <ChevronRight size={14} className="text-text-muted ml-auto group-hover:text-info-500 transition-colors flex-shrink-0" />
                 </div>
               </Link>
 
               <Link href="/nutrition" className="block">
-                <div className="flex items-center gap-3 p-3.5 rounded-xl bg-teal-50 hover:bg-teal-100 transition-colors group border border-teal-100/50">
-                  <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm shadow-teal-500/20 flex-shrink-0">
-                    <Heart className="text-white" size={18} />
+                <div className="flex items-center gap-3 p-3 rounded-[var(--radius-lg)] bg-surface-muted hover:bg-surface-subtle transition-colors group border border-border">
+                  <div className="w-9 h-9 rounded-[var(--radius-md)] bg-medical-500 flex items-center justify-center flex-shrink-0">
+                    <Heart className="text-white" size={16} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">Beslenme Rehberi</p>
-                    <p className="text-xs text-slate-400 truncate">Günlük beslenme planı</p>
+                    <p className="text-sm font-semibold text-text-primary">Beslenme Planımı Gör</p>
+                    <p className="text-xs text-text-tertiary truncate">Günlük öğün ve kısıtlamalar</p>
                   </div>
-                  <ChevronRight size={15} className="text-slate-300 ml-auto group-hover:text-teal-400 transition-colors flex-shrink-0" />
+                  <ChevronRight size={14} className="text-text-muted ml-auto group-hover:text-medical-500 transition-colors flex-shrink-0" />
                 </div>
               </Link>
             </div>
@@ -354,10 +356,14 @@ export default function DashboardPage() {
             </div>
 
             {upcomingAppointments.length === 0 ? (
-              <div className="text-center py-6">
-                <Calendar size={28} className="mx-auto text-slate-300 mb-2" />
-                <p className="text-xs text-slate-400">Yaklaşan randevunuz yok.</p>
-                <Link href="/appointments" className="text-xs text-navy-500 font-semibold hover:underline mt-1 inline-block">Randevu Al</Link>
+              <div className="text-center py-8 px-4">
+                <Calendar size={24} className="mx-auto text-text-muted mb-2" />
+                <p className="text-sm font-medium text-text-primary mb-1">Henüz randevunuz bulunmuyor</p>
+                <p className="text-xs text-text-secondary mb-3">Doktor veya diyetisyen randevusu talep edebilirsiniz.</p>
+                <Link href="/appointments" className="inline-flex items-center gap-1 text-xs font-semibold text-navy-600 hover:text-navy-700 transition-colors">
+                  Randevu Talebi Oluştur
+                  <ArrowRight size={12} />
+                </Link>
               </div>
             ) : (
               <div className="space-y-3">
