@@ -130,7 +130,7 @@ export function parseRowsIntoLabData(
       const hasMetric = Object.keys(point).some((key) => key !== "date" && key !== "sourceType");
       return hasMetric ? { ...point, sourceLabel: `Satir ${index + 1}` } : null;
     })
-    .filter((point): point is LabDataPoint => point !== null);
+    .filter((point) => point !== null);
 
   return parsedRows;
 }
