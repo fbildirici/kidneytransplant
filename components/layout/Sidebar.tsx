@@ -24,7 +24,7 @@ const navItems = [
   { href: "/nutrition", label: "Beslenme", icon: Apple },
   { href: "/messages", label: "Mesajlar", icon: MessageSquare },
   { href: "/appointments", label: "Randevular", icon: Calendar },
-  { href: "/ai-assistant", label: "Akıllı Asistan", icon: Bot },
+  { href: "/ai-assistant", label: "Sağlık Asistanı", icon: Bot },
   { href: "/profile", label: "Profil", icon: UserCircle },
 ];
 
@@ -38,6 +38,7 @@ export default function Sidebar() {
         "hidden lg:flex flex-col bg-surface border-r border-border h-screen sticky top-0 transition-all duration-300 ease-in-out",
         collapsed ? "w-[72px]" : "w-60"
       )}
+      aria-label="Ana menü"
     >
       {/* Logo */}
       <div className={cn(

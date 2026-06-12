@@ -39,7 +39,7 @@ export default function LineChart({ data, series, height = 260, normalRanges }: 
 
   if (n === 0 || series.length === 0) {
     return (
-      <div className="flex items-center justify-center h-32 text-slate-400 text-sm">
+      <div className="flex items-center justify-center h-32 text-text-muted text-sm">
         Gösterilecek veri yok
       </div>
     );

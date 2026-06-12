@@ -68,11 +68,11 @@ export default function LabTrendExplorer({
         : "text-teal-600 bg-teal-50 border-teal-200";
 
   return (
-    <div className="space-y-4 rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+    <div className="space-y-4 rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-sm font-bold text-slate-900">{title}</p>
-          <p className="text-xs text-slate-400">{subtitle}</p>
+          <p className="text-sm font-bold text-text-primary">{title}</p>
+          <p className="text-xs text-text-muted">{subtitle}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {LAB_METRIC_DEFINITIONS.map((metric) => {
@@ -90,8 +90,8 @@ export default function LabTrendExplorer({
                       : [...prev, metric.key]
                   )
                 }
-                className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
-                  active ? accentClass : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                className={`rounded-[var(--radius-lg)] border px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
+                  active ? accentClass : "border-border bg-surface text-text-tertiary hover:border-border-strong"
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -109,12 +109,12 @@ export default function LabTrendExplorer({
           const metric = LAB_METRIC_DEFINITIONS.find((item) => item.key === metricKey);
           if (!metric) return null;
           return (
-            <div key={metric.key} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{metric.label}</p>
-              <p className="mt-1 text-2xl font-black text-slate-900">
+            <div key={metric.key} className="rounded-[var(--radius-xl)] border border-border bg-surface-muted p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">{metric.label}</p>
+              <p className="mt-1 text-2xl font-bold text-text-primary">
                 {latestPoint?.[metric.key] !== undefined ? latestPoint[metric.key]?.toFixed(metric.key === "gfr" ? 0 : 1) : "-"}
               </p>
-              <p className="text-xs text-slate-400">{metric.unit}</p>
+              <p className="text-xs text-text-muted">{metric.unit}</p>
             </div>
           );
         })}
@@ -123,7 +123,7 @@ export default function LabTrendExplorer({
       {points.length > 0 ? (
         <LineChart data={chartData} series={series} normalRanges={normalRanges} />
       ) : (
-        <div className="flex items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-12 text-sm text-slate-400">
+        <div className="flex items-center justify-center rounded-[var(--radius-xl)] border border-dashed border-border bg-surface-muted px-4 py-12 text-sm text-text-muted">
           <span className="flex items-center gap-2">
             <Activity size={16} />
             Gösterilecek laboratuvar verisi yok

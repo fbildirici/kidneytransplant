@@ -1,10 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import ClientProviders from "@/components/ClientProviders";
 
 export const metadata: Metadata = {
   title: "RenaCare - Böbrek Nakli Hasta Takip Sistemi",
   description:
-    "Böbrek nakli hastaları için ilaç takibi, beslenme rehberi ve AI destekli sağlık asistanı",
+    "Böbrek nakli hastaları için ilaç takibi, beslenme rehberi ve sağlık asistanı",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
@@ -20,7 +27,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-sans antialiased text-slate-900">{children}</body>
+      <body className="font-sans antialiased text-text-primary">
+        <ClientProviders>{children}</ClientProviders>
+      </body>
     </html>
   );
 }

@@ -24,12 +24,12 @@ export function getGreeting(): string {
 
 export function getMedicationColor(index: number): string {
   const colors = [
-    "bg-teal-100 text-teal-700 border-teal-200",
-    "bg-emerald-100 text-emerald-700 border-emerald-200",
-    "bg-cyan-100 text-cyan-700 border-cyan-200",
-    "bg-sky-100 text-sky-700 border-sky-200",
-    "bg-violet-100 text-violet-700 border-violet-200",
-    "bg-rose-100 text-rose-700 border-rose-200",
+    "bg-medical-50 text-medical-700 border-medical-200",
+    "bg-success-50 text-success-700 border-success-200",
+    "bg-navy-50 text-navy-700 border-navy-200",
+    "bg-navy-50 text-navy-700 border-navy-200",
+    "bg-medical-50 text-medical-700 border-medical-200",
+    "bg-danger-50 text-danger-700 border-danger-200",
   ];
   return colors[index % colors.length];
 }
@@ -37,22 +37,22 @@ export function getMedicationColor(index: number): string {
 export function getUrgencyColor(urgency: "low" | "medium" | "high"): string {
   switch (urgency) {
     case "low":
-      return "bg-emerald-100 text-emerald-700";
+      return "bg-success-50 text-success-700";
     case "medium":
-      return "bg-amber-100 text-amber-700";
+      return "bg-warning-50 text-warning-700";
     case "high":
-      return "bg-red-100 text-red-700";
+      return "bg-danger-50 text-danger-700";
   }
 }
 
 export function getStatusColor(status: "sent" | "read" | "replied"): string {
   switch (status) {
     case "sent":
-      return "bg-sky-100 text-sky-700";
+      return "bg-navy-50 text-navy-700";
     case "read":
-      return "bg-amber-100 text-amber-700";
+      return "bg-warning-50 text-warning-700";
     case "replied":
-      return "bg-emerald-100 text-emerald-700";
+      return "bg-success-50 text-success-700";
   }
 }
 

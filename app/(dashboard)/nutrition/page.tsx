@@ -8,13 +8,18 @@ import {
 } from "@/lib/store";
 import {
   Apple,
-  CheckCircle,
   Droplets,
   Edit2,
-  Leaf,
   Save,
+  Shield,
+  MessageSquare,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 import DemoBadge from "@/components/ui/DemoBadge";
+import { useToast } from "@/lib/toast-context";
+import PageTitle from "@/components/PageTitle";
+import Link from "next/link";
 
 const PATIENT_ID = "1";
 
@@ -23,7 +28,7 @@ export default function NutritionPage() {
   const [editing, setEditing] = useState(false);
   const [waterGlasses, setWaterGlasses] = useState(5);
   const [form, setForm] = useState<StoredDietPlan | null>(null);
-  const [saved, setSaved] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     const loaded = getDietPlan(PATIENT_ID);
@@ -44,83 +49,100 @@ export default function NutritionPage() {
     setDietPlan(PATIENT_ID, updated);
     setPlan(updated);
     setEditing(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    toast.addToast("Diyet planı güncellendi.", "success");
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-600 via-teal-500 to-emerald-600 p-6 sm:p-7 text-white shadow-xl shadow-teal-500/20">
-        <div className="absolute inset-0 dot-pattern opacity-10" />
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <>
+      <PageTitle title="Beslenme" />
+      <div className="space-y-6 max-w-6xl mx-auto">
+
+      {/* Header */}
+      <div className="bg-surface rounded-[var(--radius-xl)] border border-border p-5 sm:p-6 shadow-card">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Leaf size={15} className="text-emerald-300" />
-              <span className="text-emerald-300 text-sm font-semibold">Beslenme Merkezi</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl sm:text-3xl font-black text-white mb-1.5">Diyet Planım</h1>
-              <DemoBadge text="Örnek plan" className="bg-white/90 border-white/50 text-amber-700" />
-            </div>
-            <p className="text-white/65 text-sm">Diyetisyen tarafından girilen planı görebilir, hasta olarak düzenleme yapabilir ve not ekleyebilirsiniz.</p>
+            <p className="text-xs font-semibold text-navy-600 uppercase tracking-widest mb-1">Beslenme</p>
+            <h1 className="text-xl sm:text-2xl font-semibold text-text-primary mb-1">
+              Beslenme Planı
+            </h1>
+            <p className="text-sm text-text-secondary">
+              Diyetisyeninizin önerilerini görün, su hedefini takip edin ve sorularınızı iletin.
+            </p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-white/10 border border-white/15 px-4 py-2.5 text-center">
-              <p className="text-xs text-white/70 font-medium">Su Hedefi</p>
-              <p className="text-xl font-black text-white">{waterGlasses}/8</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setEditing(true);
-                setForm(plan);
-              }}
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-teal-700 shadow-lg hover:bg-white/90 cursor-pointer"
-            >
-              <Edit2 size={15} />
-              Diyeti Düzenle
-            </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <DemoBadge />
+            {!editing && plan && (
+              <button
+                type="button"
+                onClick={() => { setEditing(true); setForm(plan); }}
+                className="inline-flex items-center gap-1.5 rounded-[var(--radius-lg)] border border-border bg-surface px-3 py-2 text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors cursor-pointer"
+              >
+                <Edit2 size={14} />
+                Düzenle
+              </button>
+            )}
           </div>
+        </div>
+
+        {/* Nutrition safety note */}
+        <div className="mt-4 flex items-start gap-2 bg-warning-50 border border-warning-200 rounded-[var(--radius-lg)] px-4 py-3">
+          <Shield size={14} className="text-warning-600 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-warning-700 leading-relaxed">
+            <span className="font-semibold">Beslenme önerileri kişisel sağlık durumunuza göre değişebilir.</span>{" "}
+            Potasyum, fosfor, sodyum ve protein hedeflerinizi doktorunuz veya diyetisyeniniz belirlemelidir.
+            Listelenen değerler genel kılavuz niteliğindedir.
+          </p>
         </div>
       </div>
 
-      {saved && (
-        <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          <CheckCircle size={18} className="text-emerald-600" />
-          Hasta tarafından güncellenen diyet planı diyetisyen paneline de yansıtıldı.
-        </div>
-      )}
-
       {plan && !editing && (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          {/* Metric cards */}
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
             {[
-              { label: "Kalori", value: `${plan.calorieTarget} kcal`, color: "bg-orange-50 text-orange-700" },
-              { label: "Protein", value: plan.proteinTarget, color: "bg-blue-50 text-blue-700" },
-              { label: "Potasyum", value: plan.potassiumLimit, color: "bg-yellow-50 text-yellow-700" },
-              { label: "Fosfor", value: plan.phosphorusLimit, color: "bg-purple-50 text-purple-700" },
-              { label: "Sıvı", value: plan.fluidLimit, color: "bg-cyan-50 text-cyan-700" },
+              { label: "Kalori Hedefi", value: `${plan.calorieTarget}`, unit: "kcal/gün", bg: "bg-warning-50", border: "border-warning-200", text: "text-warning-700" },
+              { label: "Protein Hedefi", value: plan.proteinTarget, unit: "", bg: "bg-navy-50", border: "border-navy-200", text: "text-navy-700" },
+              { label: "Potasyum Sınırı", value: plan.potassiumLimit, unit: "", bg: "bg-warning-50", border: "border-warning-200", text: "text-warning-700" },
+              { label: "Fosfor Sınırı", value: plan.phosphorusLimit, unit: "", bg: "bg-medical-50", border: "border-medical-200", text: "text-medical-700" },
+              { label: "Sıvı Hedefi", value: plan.fluidLimit, unit: "", bg: "bg-info-50", border: "border-info-200", text: "text-info-700" },
             ].map((item) => (
-              <div key={item.label} className={`rounded-2xl p-4 ${item.color}`}>
-                <p className="text-[10px] font-semibold uppercase tracking-wide opacity-75">{item.label}</p>
-                <p className="mt-1 text-xl font-black">{item.value}</p>
+              <div key={item.label} className={`rounded-[var(--radius-xl)] border ${item.border} ${item.bg} p-4`}>
+                <p className={`text-[10px] font-semibold uppercase tracking-wide ${item.text} opacity-70 mb-2`}>{item.label}</p>
+                <p className={`text-xl font-bold tabular-nums ${item.text}`}>{item.value}</p>
+                {item.unit && <p className={`text-xs ${item.text} opacity-60 mt-0.5`}>{item.unit}</p>}
               </div>
             ))}
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[1.2fr,0.8fr]">
-            <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <Apple size={18} className="text-emerald-600" />
-                <p className="text-sm font-bold text-slate-900">Öğün Planı</p>
+          <div className="grid gap-6 xl:grid-cols-[1.3fr,0.7fr]">
+            {/* Meal plan */}
+            <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-[var(--radius-md)] bg-success-50 flex items-center justify-center">
+                    <Apple size={15} className="text-success-600" />
+                  </div>
+                  <p className="text-sm font-semibold text-text-primary">Öğün Planı</p>
+                </div>
+                <span className="text-[10px] font-medium text-text-muted bg-surface-muted px-2 py-1 rounded border border-border">
+                  Diyetisyen planı
+                </span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {plan.meals.map((meal, index) => (
-                  <div key={`${meal.meal}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                    <p className="text-sm font-semibold text-slate-900">{meal.meal}</p>
-                    <ul className="mt-2 space-y-1 text-sm text-slate-600">
+                  <div key={`${meal.meal}-${index}`} className="rounded-[var(--radius-lg)] border border-border bg-surface-muted p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-5 h-5 rounded-full bg-success-100 flex items-center justify-center flex-shrink-0">
+                        <span className="text-[9px] font-bold text-success-700">{index + 1}</span>
+                      </div>
+                      <p className="text-sm font-semibold text-text-primary">{meal.meal}</p>
+                    </div>
+                    <ul className="space-y-1.5 pl-7">
                       {meal.items.map((item, itemIndex) => (
-                        <li key={`${meal.meal}-${itemIndex}`}>• {item}</li>
+                        <li key={`${meal.meal}-${itemIndex}`} className="flex items-start gap-1.5">
+                          <Check size={11} className="text-success-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-text-secondary">{item}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -129,43 +151,82 @@ export default function NutritionPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+              {/* Water tracker */}
+              <div className="rounded-[var(--radius-xl)] border border-info-200 bg-info-50 p-5">
                 <div className="flex items-center gap-2 mb-4">
-                  <Droplets size={18} className="text-cyan-600" />
-                  <p className="text-sm font-bold text-slate-900">Su Takibi</p>
+                  <Droplets size={16} className="text-info-600" />
+                  <p className="text-sm font-semibold text-info-800">Günlük Su Takibi</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setWaterGlasses((value) => Math.max(0, value - 1))}
-                    className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
-                  >
-                    -
-                  </button>
-                  <div className="flex-1 rounded-2xl bg-cyan-50 px-4 py-4 text-center">
-                    <p className="text-3xl font-black text-slate-900">{waterGlasses}</p>
-                    <p className="text-xs text-slate-500">bardak</p>
+
+                {/* Visual glasses */}
+                <div className="flex gap-1.5 flex-wrap mb-4">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setWaterGlasses(i + 1 <= waterGlasses && waterGlasses === i + 1 ? i : i + 1)}
+                      className={`w-8 h-10 rounded-[var(--radius-md)] border-2 flex items-center justify-center transition-all cursor-pointer ${
+                        i < waterGlasses
+                          ? "border-info-400 bg-info-400"
+                          : "border-info-200 bg-white/60"
+                      }`}
+                      aria-label={`${i + 1}. bardak`}
+                    >
+                      <Droplets size={12} className={i < waterGlasses ? "text-white" : "text-info-200"} />
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold tabular-nums text-info-700">{waterGlasses}<span className="text-base text-info-500">/8</span></p>
+                    <p className="text-xs text-info-600">bardak içildi</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setWaterGlasses((value) => Math.min(8, value + 1))}
-                    className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
-                  >
-                    +
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setWaterGlasses((v) => Math.max(0, v - 1))}
+                      className="w-8 h-8 rounded-full border-2 border-info-300 text-info-600 font-bold text-sm hover:bg-info-100 cursor-pointer flex items-center justify-center transition-colors"
+                    >−</button>
+                    <button
+                      type="button"
+                      onClick={() => setWaterGlasses((v) => Math.min(8, v + 1))}
+                      className="w-8 h-8 rounded-full border-2 border-info-300 text-info-600 font-bold text-sm hover:bg-info-100 cursor-pointer flex items-center justify-center transition-colors"
+                    >+</button>
+                  </div>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
-                <p className="text-sm font-bold text-slate-900 mb-3">Kısıtlamalar</p>
-                <div className="flex flex-wrap gap-2">
+              {/* Restrictions */}
+              <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <AlertCircle size={15} className="text-warning-600" />
+                  <p className="text-sm font-semibold text-text-primary">Beslenme Kısıtlamaları</p>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-3">
                   {plan.restrictions.map((restriction, index) => (
-                    <span key={`${restriction}-${index}`} className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                    <span key={`${restriction}-${index}`} className="rounded-full border border-warning-200 bg-warning-50 px-2.5 py-1 text-xs font-semibold text-warning-700">
                       {restriction}
                     </span>
                   ))}
                 </div>
-                {plan.notes && <p className="mt-4 text-sm text-slate-600">{plan.notes}</p>}
+                {plan.notes && (
+                  <p className="text-xs text-text-secondary leading-relaxed border-t border-border pt-3">{plan.notes}</p>
+                )}
+              </div>
+
+              {/* Dietitian contact */}
+              <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-4">
+                <p className="text-xs font-semibold text-text-primary mb-2">Beslenme sorunuz mu var?</p>
+                <p className="text-xs text-text-secondary mb-3 leading-relaxed">
+                  Plan hakkında soru sormak veya değişiklik talep etmek için mesaj gönderin.
+                </p>
+                <Link href="/messages">
+                  <button type="button" className="inline-flex items-center gap-1.5 text-xs font-semibold text-navy-600 hover:text-navy-700 cursor-pointer transition-colors">
+                    <MessageSquare size={13} />
+                    Diyetisyene Mesaj Gönder
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -173,24 +234,24 @@ export default function NutritionPage() {
       )}
 
       {editing && form && (
-        <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm space-y-4">
+        <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5 space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-bold text-slate-900">Hasta Düzenleme Modu</p>
-              <p className="text-xs text-slate-400">Kalori hedefleri, kısıtlamalar ve öğünleri hasta olarak güncelleyebilirsiniz.</p>
+              <p className="text-sm font-semibold text-text-primary">Hasta Düzenleme Modu</p>
+              <p className="text-xs text-text-tertiary">Kalori hedefleri, kısıtlamalar ve öğünleri hasta olarak güncelleyebilirsiniz.</p>
             </div>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setEditing(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                className="rounded-[var(--radius-lg)] border border-border px-4 py-2 text-sm font-semibold text-text-secondary hover:bg-surface-muted cursor-pointer"
               >
                 İptal
               </button>
               <button
                 type="button"
                 onClick={handleSave}
-                className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 cursor-pointer"
+                className="rounded-[var(--radius-lg)] bg-success-500 px-4 py-2 text-sm font-semibold text-white hover:bg-success-600 cursor-pointer"
               >
                 <span className="flex items-center gap-2">
                   <Save size={15} />
@@ -209,7 +270,7 @@ export default function NutritionPage() {
               { key: "fluidLimit", label: "Sıvı" },
             ].map((field) => (
               <div key={field.key}>
-                <label className="mb-1 block text-xs font-medium text-slate-600">{field.label}</label>
+                <label className="mb-1 block text-xs font-medium text-text-tertiary">{field.label}</label>
                 <input
                   type="text"
                   value={String(form[field.key as keyof StoredDietPlan] ?? "")}
@@ -223,14 +284,14 @@ export default function NutritionPage() {
                         : prev
                     )
                   }
-                  className="modern-field w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  className="w-full rounded-[var(--radius-lg)] border border-border bg-surface px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-navy-500"
                 />
               </div>
             ))}
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Kısıtlamalar</label>
+            <label className="mb-1 block text-xs font-medium text-text-tertiary">Kısıtlamalar</label>
             <textarea
               rows={4}
               value={form.restrictions.join("\n")}
@@ -247,15 +308,15 @@ export default function NutritionPage() {
                     : prev
                 )
               }
-              className="modern-field w-full resize-none rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="w-full resize-none rounded-[var(--radius-lg)] border border-border bg-surface px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-navy-500"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Öğünler</label>
+            <label className="mb-1 block text-xs font-medium text-text-tertiary">Öğünler</label>
             <div className="space-y-3">
               {form.meals.map((meal, index) => (
-                <div key={`${meal.meal}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                <div key={`${meal.meal}-${index}`} className="rounded-[var(--radius-lg)] border border-border bg-surface-muted p-4">
                   <input
                     type="text"
                     value={meal.meal}
@@ -271,7 +332,7 @@ export default function NutritionPage() {
                           : prev
                       )
                     }
-                    className="modern-field w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                    className="w-full rounded-[var(--radius-lg)] border border-border bg-surface px-3 py-2 text-sm font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ring-navy-500"
                   />
                   <textarea
                     rows={3}
@@ -296,7 +357,7 @@ export default function NutritionPage() {
                           : prev
                       )
                     }
-                    className="modern-field mt-2 w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                    className="mt-2 w-full resize-none rounded-[var(--radius-lg)] border border-border bg-surface px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-navy-500"
                   />
                 </div>
               ))}
@@ -304,16 +365,17 @@ export default function NutritionPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Ek Notlar</label>
+            <label className="mb-1 block text-xs font-medium text-text-tertiary">Ek Notlar</label>
             <textarea
               rows={3}
               value={form.notes}
               onChange={(event) => setForm((prev) => (prev ? { ...prev, notes: event.target.value } : prev))}
-              className="modern-field w-full resize-none rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="w-full resize-none rounded-[var(--radius-lg)] border border-border bg-surface px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-navy-500"
             />
           </div>
         </div>
       )}
     </div>
+    </>
   );
 }

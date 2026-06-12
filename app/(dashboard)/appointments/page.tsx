@@ -8,8 +8,11 @@ import {
   getSlots,
   ProviderRole,
 } from "@/lib/store";
-import { Calendar, CheckCircle, Clock, UserRound, Users } from "lucide-react";
+import { Calendar, CalendarDays, CalendarX2, CheckCircle, Clock, UserRound, Users, XCircle, AlertCircle } from "lucide-react";
+import Badge from "@/components/ui/Badge";
 import DemoBadge from "@/components/ui/DemoBadge";
+import EmptyState from "@/components/ui/EmptyState";
+import PageTitle from "@/components/PageTitle";
 
 const PATIENT_ID = "1";
 const PATIENT_NAME = "Ahmet Yılmaz";
@@ -51,24 +54,32 @@ export default function PatientAppointmentsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy-600 via-navy-500 to-teal-600 p-6 sm:p-7 text-white shadow-xl shadow-navy-500/20">
-        <div className="absolute inset-0 dot-pattern opacity-10" />
-        <div className="relative">
-          <div className="flex items-center gap-2 mb-2">
-            <Calendar size={15} className="text-teal-300" />
-            <span className="text-teal-300 text-sm font-semibold">Randevu Merkezi</span>
+    <>
+      <PageTitle title="Randevular" />
+      <div className="space-y-6 max-w-6xl mx-auto">
+      <div className="bg-surface rounded-[var(--radius-xl)] border border-border p-5 sm:p-6 shadow-card">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold text-navy-600 uppercase tracking-widest mb-1">Randevular</p>
+            <h1 className="text-xl sm:text-2xl font-semibold text-text-primary mb-1">
+              Randevu Talebi Oluştur
+            </h1>
+            <p className="text-sm text-text-secondary">
+              Doktor veya diyetisyen için slot seçin. Talebiniz koordinatör onayından sonra kesinleşir; onaylandığında bildirim alırsınız.
+            </p>
           </div>
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl sm:text-3xl font-black text-white mb-1.5">Randevu Talebi Oluştur</h1>
-            <DemoBadge text="Demo verisi" className="bg-white/90 border-white/50 text-amber-700" />
-          </div>
-          <p className="text-white/65 text-sm">Doktor veya diyetisyen için slot seçin. Talebiniz koordinatör onayından sonra kesinleşir.</p>
+          <DemoBadge />
+        </div>
+        <div className="mt-4 flex items-start gap-2 bg-warning-50 border border-warning-200 rounded-[var(--radius-lg)] px-4 py-3">
+          <AlertCircle size={14} className="text-warning-600 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-warning-700 leading-relaxed">
+            Randevu sistemi olağan kontroller içindir. Acil tıbbi durumlarda 112'yi arayın veya en yakın acil servise başvurun.
+          </p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Sağlayıcı</p>
+      <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary mb-3">Sağlayıcı</p>
         <div className="flex flex-wrap gap-2">
           {[
             { id: "doctor", label: "Doktor" },
@@ -78,10 +89,10 @@ export default function PatientAppointmentsPage() {
               key={item.id}
               type="button"
               onClick={() => setProviderRole(item.id as ProviderRole)}
-              className={`rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
+              className={`rounded-[var(--radius-lg)] border px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
                 providerRole === item.id
-                  ? "border-teal-200 bg-teal-50 text-teal-700"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                  ? "border-navy-300 bg-navy-50 text-navy-700"
+                  : "border-border bg-surface text-text-secondary hover:border-border-hover"
               }`}
             >
               {item.label}
@@ -91,32 +102,36 @@ export default function PatientAppointmentsPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr,0.8fr]">
-        <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+        <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Users size={16} className="text-teal-600" />
-            <p className="text-sm font-bold text-slate-900">Müsait Slotlar</p>
+            <Users size={16} className="text-navy-600" />
+            <p className="text-sm font-semibold text-text-primary">Müsait Slotlar</p>
           </div>
 
           <div className="space-y-4">
             {Object.keys(groupedAvailable).length === 0 ? (
-              <p className="text-sm text-slate-400">Seçili sağlayıcı için müsait slot yok.</p>
+              <EmptyState
+                icon={CalendarX2}
+                title="Müsait slot bulunmuyor"
+                description="Seçili sağlayıcı için şu anda müsait randevu slotu yok."
+              />
             ) : (
               Object.entries(groupedAvailable).map(([date, slots]) => (
-                <div key={date} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                  <p className="text-sm font-semibold text-slate-900">{formatDate(date)}</p>
+                <div key={date} className="rounded-[var(--radius-lg)] border border-border bg-surface-muted p-4">
+                  <p className="text-sm font-semibold text-text-primary">{formatDate(date)}</p>
                   <div className="mt-3 grid gap-2 sm:grid-cols-3">
                     {slots.map((slot) => (
                       <button
                         key={slot.id}
                         type="button"
                         onClick={() => requestAppointment(slot.id)}
-                        className="rounded-xl border border-teal-200 bg-white px-3 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:border-teal-300 transition-colors cursor-pointer"
+                        className="rounded-[var(--radius-lg)] border border-border bg-surface px-3 py-3 text-left text-sm font-semibold text-text-primary hover:bg-navy-50 hover:border-navy-200 transition-colors cursor-pointer"
                       >
                         <div className="flex items-center gap-2">
-                          <Clock size={14} className="text-teal-600" />
+                          <Clock size={14} className="text-navy-600" />
                           {slot.time}
                         </div>
-                        <p className="mt-2 text-xs text-slate-500">{slot.providerName}</p>
+                        <p className="mt-2 text-xs text-text-tertiary">{slot.providerName}</p>
                       </button>
                     ))}
                   </div>
@@ -127,53 +142,57 @@ export default function PatientAppointmentsPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+          <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5">
             <div className="flex items-center gap-2 mb-4">
-              <CheckCircle size={16} className="text-emerald-600" />
-              <p className="text-sm font-bold text-slate-900">Benim Taleplerim</p>
+              <CheckCircle size={16} className="text-success-600" />
+              <p className="text-sm font-semibold text-text-primary">Benim Taleplerim</p>
             </div>
 
             <div className="space-y-3">
               {upcoming.length === 0 ? (
-                <p className="text-sm text-slate-400">Henüz randevu talebiniz yok.</p>
+                <EmptyState
+                  icon={CalendarDays}
+                  title="Henüz randevu talebiniz yok"
+                  description="Doktor veya diyetisyen için slot seçip talep oluşturabilirsiniz."
+                  action={{ label: "Slot Gör", href: "/appointments" }}
+                />
               ) : (
                 upcoming.map((slot) => (
-                  <div key={slot.id} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                  <div key={slot.id} className="rounded-[var(--radius-lg)] border border-border bg-surface-muted p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold text-slate-900">{formatDate(slot.date)} · {slot.time}</p>
-                        <p className="text-xs text-slate-500">{slot.providerName} · {slot.specialty}</p>
+                        <p className="text-sm font-semibold text-text-primary">{formatDate(slot.date)} · {slot.time}</p>
+                        <p className="text-xs text-text-tertiary">{slot.providerName} · {slot.specialty}</p>
                       </div>
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                        slot.status === "approved"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : slot.status === "pending"
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-rose-100 text-rose-700"
-                      }`}>
-                        {slot.status === "approved" ? "Onaylı" : slot.status === "pending" ? "Onay Bekliyor" : "Reddedildi"}
-                      </span>
+                      {slot.status === "approved" ? (
+                        <Badge variant="success"><CheckCircle size={10} /> Onaylı</Badge>
+                      ) : slot.status === "pending" ? (
+                        <Badge variant="warning"><Clock size={10} /> Onay Bekliyor</Badge>
+                      ) : (
+                        <Badge variant="danger"><XCircle size={10} /> Reddedildi</Badge>
+                      )}
                     </div>
-                    {slot.rejectionReason && <p className="mt-2 text-xs text-rose-600">{slot.rejectionReason}</p>}
+                    {slot.rejectionReason && <p className="mt-2 text-xs text-danger-600">{slot.rejectionReason}</p>}
                   </div>
                 ))
               )}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+          <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5">
             <div className="flex items-center gap-2 mb-3">
               <UserRound size={16} className="text-navy-600" />
-              <p className="text-sm font-bold text-slate-900">Onay Akışı</p>
+              <p className="text-sm font-semibold text-text-primary">Onay Akışı</p>
             </div>
-            <ol className="space-y-2 text-sm text-slate-600">
+            <ol className="space-y-2 text-sm text-text-secondary">
               <li>1. Uygun slotu seçip talep oluşturursunuz.</li>
               <li>2. Koordinatör doktor/diyetisyen programına göre onay verir.</li>
-              <li>3. Onay sonrası randevu `onaylı` durumuna geçer.</li>
+              <li>3. Onay sonrası randevu onaylı durumuna geçer.</li>
             </ol>
           </div>
         </div>
       </div>
     </div>
+    </>
   );
 }

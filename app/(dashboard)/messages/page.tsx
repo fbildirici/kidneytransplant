@@ -5,7 +5,6 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
-import { getUrgencyColor, getStatusColor, getStatusText } from "@/lib/utils";
 import {
   MessageSquare,
   Send,
@@ -13,6 +12,7 @@ import {
   Clock,
   AlertCircle,
   CheckCircle,
+  Eye,
   Mail,
   Bot,
   Pill,
@@ -22,6 +22,9 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import DemoBadge from "@/components/ui/DemoBadge";
+import EmptyState from "@/components/ui/EmptyState";
+import { useToast } from "@/lib/toast-context";
+import PageTitle from "@/components/PageTitle";
 
 interface DoctorMessage {
   id: string;
@@ -51,9 +54,9 @@ const initialMessages: DoctorMessage[] = [
   },
   {
     id: "2",
-    subject: "AI Asistan Yanıtı - Beslenme sorusu",
+    subject: "Asistan Yanıtı - Beslenme sorusu",
     content:
-      'AI asistana "Nakil sonrası hangi meyveleri yiyebilirim?" diye sordum. Verdiği yanıtı sizinle paylaşmak istiyorum. Özellikle karpuz konusunda doğrulama istiyorum.',
+      'Asistana "Nakil sonrası hangi meyveleri yiyebilirim?" diye sordum. Verdiği yanıtı sizinle paylaşmak istiyorum. Özellikle karpuz konusunda doğrulama istiyorum.',
     urgency: "low",
     status: "read",
     fromAI: true,
@@ -87,9 +90,9 @@ const initialMessages: DoctorMessage[] = [
 ];
 
 const urgencyOptions = [
-  { value: "low", label: "Düşük", desc: "Genel soru, acil değil" },
-  { value: "medium", label: "Orta", desc: "Yakın zamanda yanıt bekleniyor" },
-  { value: "high", label: "Yüksek", desc: "Acil durum, hızlı yanıt gerekli" },
+  { value: "low", label: "Düşük öncelik", desc: "Genel soru, yanıt acil değil" },
+  { value: "medium", label: "Normal öncelik", desc: "Birkaç gün içinde yanıt bekleniyor" },
+  { value: "high", label: "Yüksek öncelik", desc: "Hızlı yanıt gerektiren tıbbi soru" },
 ];
 
 const messageTemplates = [
@@ -97,7 +100,7 @@ const messageTemplates = [
   { id: "side_effect", icon: Pill, label: "İlaç Yan Etkisi", text: "[İlaç adı] ilacını almaya başladıktan sonra şu yan etkileri yaşıyorum: [yan etki]. İlacı ne zaman başladığım: [tarih]." },
   { id: "lab", icon: FileText, label: "Lab Sonucu", text: "Son kan tahlilimde şu değerler dikkatimi çekti: [değerler]. Tahlil tarihi: [tarih]. Değerlendirmenizi rica ederim." },
   { id: "appointment", icon: Calendar, label: "Randevu Talebi", text: "Kontrol randevusu talep etmek istiyorum. Müsait olduğum günler: [günler]. Öncelikli konu: [konu]." },
-  { id: "ai_verify", icon: Bot, label: "AI Yanıtını Doğrula", text: "AI asistana sorduğum soru ve aldığım yanıtı sizinle paylaşmak istiyorum. Soru: [soru]. AI yanıtı: [yanıt]. Bu bilgiyi doğrular mısınız?" },
+  { id: "ai_verify", icon: Bot, label: "Asistan Yanıtını Doğrula", text: "Sağlık asistanına sorduğum soru ve aldığım yanıtı sizinle paylaşmak istiyorum. Soru: [soru]. Asistan yanıtı: [yanıt]. Bu bilgiyi doğrular mısınız?" },
 ];
 
 export default function MessagesPage() {
@@ -105,7 +108,7 @@ export default function MessagesPage() {
   const [showNewModal, setShowNewModal] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<DoctorMessage | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [sendSuccess, setSendSuccess] = useState(false);
+  const toast = useToast();
   const [newMessage, setNewMessage] = useState({
     subject: "",
     content: "",
@@ -126,40 +129,41 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy-600 via-navy-500 to-teal-600 p-6 sm:p-7 text-white shadow-xl shadow-navy-500/20">
-        <div className="absolute -right-10 -top-10 w-52 h-52 bg-white/5 rounded-full blur-2xl" />
-        <div className="absolute inset-0 dot-pattern opacity-10" />
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <>
+      <PageTitle title="Mesajlar" />
+      <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Header */}
+      <div className="bg-surface rounded-[var(--radius-xl)] border border-border p-5 sm:p-6 shadow-card">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <MessageSquare size={15} className="text-teal-300" />
-              <span className="text-teal-300 text-sm font-semibold">Güvenli Mesajlaşma</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl sm:text-3xl font-black text-white mb-1.5">Doktor Mesajları</h1>
-              <DemoBadge text="Örnek veri" className="bg-white/90 border-white/50 text-amber-700" />
-            </div>
-            <p className="text-white/60 text-sm">Doktorunuzla güvenli bir şekilde iletişim kurun.</p>
+            <p className="text-xs font-semibold text-navy-600 uppercase tracking-widest mb-1">Mesajlar</p>
+            <h1 className="text-xl sm:text-2xl font-semibold text-text-primary mb-1">
+              Sağlık Ekibinizle İletişim
+            </h1>
+            <p className="text-sm text-text-secondary max-w-lg">
+              Doktorunuza ve sağlık ekibinize mesaj gönderin. Endişelerinizi, sorularınızı ve lab sonuçlarınızı güvenle paylaşın.
+            </p>
           </div>
-          <button
-            onClick={() => { setShowNewModal(true); setSelectedTemplate(null); setNewMessage({ subject: "", content: "", urgency: "low" }); }}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white text-navy-700 hover:bg-white/92 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-navy-900/15 flex-shrink-0"
-          >
-            <Plus size={15} />
-            Yeni Mesaj
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <DemoBadge />
+            <Button
+              size="sm"
+              onClick={() => { setShowNewModal(true); setSelectedTemplate(null); setNewMessage({ subject: "", content: "", urgency: "low" }); }}
+            >
+              <Plus size={15} />
+              Yeni Mesaj
+            </Button>
+          </div>
+        </div>
+        {/* Emergency note */}
+        <div className="mt-4 flex items-start gap-2 bg-danger-50 border border-danger-200 rounded-[var(--radius-lg)] px-4 py-3">
+          <ShieldAlert size={14} className="text-danger-600 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-danger-700 leading-relaxed">
+            <span className="font-semibold">Acil durumlarda mesaj beklemek yerine 112'yi arayın.</span>{" "}
+            Göğüs ağrısı, nefes darlığı, bilinç bulanıklığı, ciddi ateş veya ani kötüleşme durumlarında doğrudan acil sağlık hizmetine başvurun.
+          </p>
         </div>
       </div>
-
-      {/* Send success */}
-      {sendSuccess && (
-        <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
-          <CheckCircle size={20} className="text-emerald-500 flex-shrink-0" />
-          <p className="text-sm font-semibold text-emerald-800">Mesajınız Dr. Ayşe Kaya&apos;ya iletildi.</p>
-        </div>
-      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -169,37 +173,37 @@ export default function MessagesPage() {
             count: statusCounts.all,
             filter: "all",
             icon: Mail,
-            color: "bg-slate-100 text-slate-600",
+            color: "bg-surface-muted text-text-secondary",
           },
           {
             label: "Gönderildi",
             count: statusCounts.sent,
             filter: "sent",
             icon: Send,
-            color: "bg-sky-100 text-sky-600",
+            color: "bg-navy-50 text-navy-600",
           },
           {
             label: "Okundu",
             count: statusCounts.read,
             filter: "read",
             icon: CheckCircle,
-            color: "bg-amber-100 text-amber-600",
+            color: "bg-warning-50 text-warning-600",
           },
           {
             label: "Yanıtlandı",
             count: statusCounts.replied,
             filter: "replied",
             icon: MessageSquare,
-            color: "bg-emerald-100 text-emerald-600",
+            color: "bg-success-50 text-success-600",
           },
         ].map((stat) => (
           <button
             key={stat.filter}
             onClick={() => setFilterStatus(stat.filter)}
-            className={`p-4 rounded-xl border transition-all cursor-pointer ${
+            className={`p-4 rounded-[var(--radius-lg)] border transition-all cursor-pointer ${
               filterStatus === stat.filter
-                ? "border-navy-300 bg-navy-50 shadow-sm"
-                : "border-slate-100 bg-white hover:border-slate-200"
+                ? "border-navy-300 bg-navy-50"
+                : "border-border bg-surface hover:border-border-hover"
             }`}
           >
             <div className="flex items-center gap-2 mb-1">
@@ -208,11 +212,11 @@ export default function MessagesPage() {
               >
                 <stat.icon size={16} />
               </div>
-              <span className="text-xl font-bold text-slate-900">
+              <span className="text-xl font-bold text-text-primary">
                 {stat.count}
               </span>
             </div>
-            <p className="text-xs text-slate-500 text-left">{stat.label}</p>
+            <p className="text-xs text-text-tertiary text-left">{stat.label}</p>
           </button>
         ))}
       </div>
@@ -220,13 +224,12 @@ export default function MessagesPage() {
       {/* Message List */}
       <div className="space-y-3">
         {filteredMessages.length === 0 ? (
-          <Card className="text-center py-12">
-            <MessageSquare
-              className="mx-auto text-slate-300 mb-3"
-              size={48}
-            />
-            <p className="text-slate-500">Bu kategoride mesaj bulunmuyor.</p>
-          </Card>
+          <EmptyState
+            icon={MessageSquare}
+            title="Bu kategoride mesaj bulunmuyor"
+            description="Doktorunuza yeni bir mesaj göndererek iletişime geçebilirsiniz."
+            action={{ label: "Yeni Mesaj", href: "/messages" }}
+          />
         ) : (
           filteredMessages.map((msg) => (
             <Card
@@ -243,45 +246,45 @@ export default function MessagesPage() {
                       {msg.fromAI && (
                         <Badge variant="info" className="gap-1">
                           <Bot size={10} />
-                          AI
+                          Asistan
                         </Badge>
                       )}
-                      <Badge
-                        className={getUrgencyColor(msg.urgency)}
-                      >
-                        {msg.urgency === "high"
-                          ? "Acil"
-                          : msg.urgency === "medium"
-                            ? "Orta"
-                            : "Düşük"}
-                      </Badge>
-                      <Badge
-                        className={getStatusColor(msg.status)}
-                      >
-                        {getStatusText(msg.status)}
-                      </Badge>
+                      {msg.urgency === "high" ? (
+                        <Badge variant="danger"><AlertCircle size={10} /> Acil</Badge>
+                      ) : msg.urgency === "medium" ? (
+                        <Badge variant="warning"><AlertCircle size={10} /> Orta</Badge>
+                      ) : (
+                        <Badge variant="success"><CheckCircle size={10} /> Düşük</Badge>
+                      )}
+                      {msg.status === "sent" ? (
+                        <Badge variant="info"><Send size={10} /> Gönderildi</Badge>
+                      ) : msg.status === "read" ? (
+                        <Badge variant="warning"><Eye size={10} /> Okundu</Badge>
+                      ) : (
+                        <Badge variant="success"><MessageSquare size={10} /> Yanıtlandı</Badge>
+                      )}
                     </div>
-                    <h3 className="font-semibold text-slate-900 mt-2">
+                    <h3 className="font-semibold text-text-primary mt-2">
                       {msg.subject}
                     </h3>
-                    <p className="text-sm text-slate-500 mt-1 line-clamp-2">
+                    <p className="text-sm text-text-secondary mt-1 line-clamp-2">
                       {msg.content}
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-xs text-slate-400">{msg.createdAt}</p>
-                    <p className="text-xs text-slate-400 mt-1">{msg.doctor}</p>
+                    <p className="text-xs text-text-tertiary">{msg.createdAt}</p>
+                    <p className="text-xs text-text-tertiary mt-1">{msg.doctor}</p>
                   </div>
                 </div>
                 {msg.reply && (
-                  <div className="mt-3 p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+                  <div className="mt-3 p-3 rounded-[var(--radius-lg)] bg-success-50 border border-success-100">
                     <div className="flex items-center gap-1.5 mb-1">
-                      <CheckCircle size={12} className="text-emerald-600" />
-                      <span className="text-xs font-medium text-emerald-700">
+                      <CheckCircle size={12} className="text-success-600" />
+                      <span className="text-xs font-medium text-success-700">
                         Doktor Yanıtı
                       </span>
                     </div>
-                    <p className="text-sm text-emerald-800">{msg.reply}</p>
+                    <p className="text-sm text-success-800">{msg.reply}</p>
                   </div>
                 )}
               </div>
@@ -307,7 +310,7 @@ export default function MessagesPage() {
             }
           />
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-text-secondary">
               Mesajınız
             </label>
             <textarea
@@ -317,11 +320,11 @@ export default function MessagesPage() {
               onChange={(e) =>
                 setNewMessage((prev) => ({ ...prev, content: e.target.value }))
               }
-              className="modern-field w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent resize-none"
+              className="w-full rounded-[var(--radius-lg)] border border-border bg-surface px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted transition-all duration-200 focus:outline-none focus:ring-[3px] focus:ring-navy-500/15 focus:border-navy-400 hover:border-border-strong resize-none"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-text-secondary">
               Aciliyet Seviyesi
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -334,23 +337,23 @@ export default function MessagesPage() {
                       urgency: opt.value as "low" | "medium" | "high",
                     }))
                   }
-                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                  className={`p-3 rounded-[var(--radius-lg)] border text-left transition-all cursor-pointer ${
                     newMessage.urgency === opt.value
                       ? "border-navy-300 bg-navy-50"
-                      : "border-slate-200 hover:border-slate-300"
+                      : "border-border hover:border-border-hover bg-surface"
                   }`}
                 >
-                  <p className="text-sm font-medium text-slate-900">
+                  <p className="text-sm font-medium text-text-primary">
                     {opt.label}
                   </p>
-                  <p className="text-xs text-slate-500">{opt.desc}</p>
+                  <p className="text-xs text-text-tertiary">{opt.desc}</p>
                 </button>
               ))}
             </div>
           </div>
           {/* Message Templates */}
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-text-secondary">
               Şablon Seçin (isteğe bağlı)
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -362,41 +365,39 @@ export default function MessagesPage() {
                     setSelectedTemplate(tpl.id);
                     setNewMessage((prev) => ({ ...prev, subject: tpl.label, content: tpl.text }));
                   }}
-                  className={`flex items-center gap-2 p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 p-2.5 rounded-[var(--radius-lg)] border text-left text-xs transition-all cursor-pointer ${
                     selectedTemplate === tpl.id
                       ? "border-navy-300 bg-navy-50"
-                      : "border-slate-200 hover:border-slate-300 bg-white"
+                      : "border-border hover:border-border-hover bg-surface"
                   }`}
                 >
-                  <tpl.icon size={14} className="flex-shrink-0 text-slate-500" />
-                  <span className="font-medium text-slate-700">{tpl.label}</span>
+                  <tpl.icon size={14} className="flex-shrink-0 text-navy-500" />
+                  <span className="font-medium text-text-secondary">{tpl.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {newMessage.urgency === "high" ? (
-            <div className="bg-red-50 border border-red-300 rounded-xl p-3 flex gap-2">
-              <ShieldAlert
-                size={18}
-                className="text-red-600 flex-shrink-0 mt-0.5"
-              />
-              <div className="text-xs text-red-800">
-                <p className="font-bold mb-0.5">Bu mesaj acil yanıt garantisi vermez.</p>
-                <p>Ateş, nefes darlığı, göğüs ağrısı, şiddetli ödem veya idrar azalması gibi belirtileriniz varsa hemen <strong>112</strong>&apos;yi arayın veya en yakın acil servise gidin. Mesajlaşma sistemi acil müdahale yerine geçmez.</p>
-                <p className="mt-1 font-semibold">Doktorunuz genellikle 24 saat içinde yanıtlar.</p>
+            <div className="bg-danger-50 border border-danger-200 rounded-[var(--radius-lg)] p-4 flex gap-3">
+              <ShieldAlert size={16} className="text-danger-600 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-danger-800">
+                <p className="font-semibold mb-1">Bu mesaj acil yanıt garantisi vermez.</p>
+                <p className="leading-relaxed mb-2">
+                  Ateş (38°C üstü), nefes darlığı, göğüs ağrısı, şiddetli ödem veya idrar azalması gibi belirtileriniz varsa
+                  hemen <span className="font-bold">112</span>'yi arayın veya en yakın acil servise gidin.
+                  Mesajlaşma sistemi acil tıbbi müdahalenin yerini tutmaz.
+                </p>
+                <p className="font-medium text-danger-700">Doktorunuz genellikle 24 saat içinde yanıtlar.</p>
               </div>
             </div>
           ) : (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex gap-2">
-              <AlertCircle
-                size={16}
-                className="text-amber-500 flex-shrink-0 mt-0.5"
-              />
-              <div className="text-xs text-amber-700">
-                <p>Acil tıbbi durumlar için lütfen 112&apos;yi arayın veya en yakın acil servise başvurun. Bu mesajlaşma sistemi acil durumlar için uygun değildir.</p>
-                <p className="mt-1 font-semibold">Doktorunuz genellikle 24 saat içinde yanıtlar.</p>
-              </div>
+            <div className="bg-surface-muted border border-border rounded-[var(--radius-lg)] p-3 flex gap-2">
+              <AlertCircle size={14} className="text-text-muted flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Acil tıbbi durumlar için 112'yi arayın veya en yakın acil servise başvurun.
+                Doktorunuz mesajlarınızı genellikle 24 saat içinde yanıtlar.
+              </p>
             </div>
           )}
           <div className="flex gap-3 pt-2">
@@ -425,8 +426,7 @@ export default function MessagesPage() {
                 setMessages((prev) => [sent, ...prev]);
                 setNewMessage({ subject: "", content: "", urgency: "low" });
                 setShowNewModal(false);
-                setSendSuccess(true);
-                setTimeout(() => setSendSuccess(false), 3000);
+                toast.addToast("Mesajınız Dr. Ayşe Kaya'ya iletildi.", "success");
               }}
             >
               <Send size={16} />
@@ -449,44 +449,44 @@ export default function MessagesPage() {
               {selectedMessage.fromAI && (
                 <Badge variant="info" className="gap-1">
                   <Bot size={10} />
-                  AI Kaynağı
+                  Asistan Kaynağı
                 </Badge>
               )}
-              <Badge
-                className={getUrgencyColor(selectedMessage.urgency)}
-              >
-                {selectedMessage.urgency === "high"
-                  ? "Acil"
-                  : selectedMessage.urgency === "medium"
-                    ? "Orta"
-                    : "Düşük"}
-              </Badge>
-              <Badge
-                className={getStatusColor(selectedMessage.status)}
-              >
-                {getStatusText(selectedMessage.status)}
-              </Badge>
+              {selectedMessage.urgency === "high" ? (
+                <Badge variant="danger"><AlertCircle size={10} /> Acil</Badge>
+              ) : selectedMessage.urgency === "medium" ? (
+                <Badge variant="warning"><AlertCircle size={10} /> Orta</Badge>
+              ) : (
+                <Badge variant="success"><CheckCircle size={10} /> Düşük</Badge>
+              )}
+              {selectedMessage.status === "sent" ? (
+                <Badge variant="info"><Send size={10} /> Gönderildi</Badge>
+              ) : selectedMessage.status === "read" ? (
+                <Badge variant="warning"><Eye size={10} /> Okundu</Badge>
+              ) : (
+                <Badge variant="success"><MessageSquare size={10} /> Yanıtlandı</Badge>
+              )}
             </div>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-sm text-text-tertiary">
               <Clock size={14} />
               <span>{selectedMessage.createdAt}</span>
               <span>•</span>
               <span>{selectedMessage.doctor}</span>
             </div>
-            <div className="p-4 bg-slate-50 rounded-xl">
-              <p className="text-sm text-slate-700 whitespace-pre-wrap">
+            <div className="p-4 bg-surface-muted rounded-[var(--radius-lg)]">
+              <p className="text-sm text-text-primary whitespace-pre-wrap">
                 {selectedMessage.content}
               </p>
             </div>
             {selectedMessage.reply && (
-              <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl">
+              <div className="p-4 bg-success-50 border border-success-100 rounded-[var(--radius-lg)]">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <CheckCircle size={14} className="text-emerald-600" />
-                  <span className="text-sm font-medium text-emerald-700">
+                  <CheckCircle size={14} className="text-success-600" />
+                  <span className="text-sm font-medium text-success-700">
                     Doktor Yanıtı - {selectedMessage.doctor}
                   </span>
                 </div>
-                <p className="text-sm text-emerald-800 whitespace-pre-wrap">
+                <p className="text-sm text-success-800 whitespace-pre-wrap">
                   {selectedMessage.reply}
                 </p>
               </div>
@@ -495,5 +495,6 @@ export default function MessagesPage() {
         )}
       </Modal>
     </div>
+    </>
   );
 }

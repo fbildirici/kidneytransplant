@@ -6,8 +6,6 @@ import Badge from "@/components/ui/Badge";
 import {
   Bot,
   Send,
-  Forward,
-  Sparkles,
   AlertCircle,
   Loader2,
   Heart,
@@ -20,6 +18,7 @@ import {
   Stethoscope,
 } from "lucide-react";
 import DemoBadge from "@/components/ui/DemoBadge";
+import PageTitle from "@/components/PageTitle";
 
 const EMERGENCY_KEYWORDS = [
   "ateş", "fever", "ısısı yüksek", "38", "39", "40",
@@ -60,29 +59,51 @@ interface Message {
 
 const suggestedQuestions = [
   {
+    category: "İlaçlar",
     icon: Pill,
     text: "Tacrolimus ilacımı ne zaman almalıyım?",
-    color: "bg-teal-50 text-teal-700 border-teal-200",
+    iconBg: "bg-navy-50",
+    iconColor: "text-navy-600",
   },
   {
+    category: "Beslenme",
     icon: Apple,
     text: "Nakil sonrası hangi meyveleri yiyebilirim?",
-    color: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    iconBg: "bg-success-50",
+    iconColor: "text-success-600",
   },
   {
+    category: "Lab Sonuçları",
     icon: Activity,
-    text: "Egzersiz yapmaya ne zaman başlayabilirim?",
-    color: "bg-cyan-50 text-cyan-700 border-cyan-200",
+    text: "Kreatinin değerim yüksekse ne yapmalıyım?",
+    iconBg: "bg-info-50",
+    iconColor: "text-info-600",
   },
   {
+    category: "Günlük Yaşam",
     icon: Heart,
-    text: "Kreatinin değerim yüksekse ne yapmalıyım?",
-    color: "bg-sky-50 text-sky-700 border-sky-200",
+    text: "Egzersiz yapmaya ne zaman başlayabilirim?",
+    iconBg: "bg-medical-50",
+    iconColor: "text-medical-600",
+  },
+  {
+    category: "Randevuya Hazırlık",
+    icon: Stethoscope,
+    text: "Randevu öncesi hangi soruları hazırlamalıyım?",
+    iconBg: "bg-warning-50",
+    iconColor: "text-warning-600",
+  },
+  {
+    category: "İlaçlar",
+    icon: Pill,
+    text: "Tacrolimus seviyem hakkında doktora nasıl soru sorabilirim?",
+    iconBg: "bg-navy-50",
+    iconColor: "text-navy-600",
   },
 ];
 
 const mockResponses: Record<string, string> = {
-  default: `Merhaba! Ben RenaCare AI asistanınızım. Böbrek nakli sonrası sürecinizde size yardımcı olmak için buradayım.
+  default: `Merhaba! Ben RenaCare sağlık asistanınızım. Böbrek nakli sonrası sürecinizde size yardımcı olmak için buradayım.
 
 Size ilaçlarınız, beslenmeniz, egzersiz rutininiz ve genel sağlık durumunuz hakkında bilgi verebilirim.
 
@@ -217,13 +238,66 @@ function getMockResponse(message: string): string {
   return mockResponses.default;
 }
 
+function MarkdownText({ text }: { text: string }) {
+  const lines = text.split("\n");
+  return (
+    <>
+      {lines.map((line, i) => {
+        const trimmed = line.trim();
+        if (trimmed === "---") {
+          return <hr key={i} className="my-3 border-border" />;
+        }
+        if (trimmed.startsWith("### ")) {
+          return (
+            <h3 key={i} className="text-sm font-semibold text-text-primary mt-3 mb-1">
+              {parseInline(trimmed.slice(4))}
+            </h3>
+          );
+        }
+        if (trimmed.startsWith("**") && trimmed.endsWith("**") && trimmed.length > 4) {
+          return (
+            <h3 key={i} className="text-sm font-semibold text-text-primary mt-3 mb-1">
+              {parseInline(trimmed)}
+            </h3>
+          );
+        }
+        if (trimmed.startsWith("- ")) {
+          return (
+            <li key={i} className="ml-4 text-sm text-text-secondary leading-relaxed">
+              {parseInline(trimmed.slice(2))}
+            </li>
+          );
+        }
+        if (trimmed === "") {
+          return <div key={i} className="h-2" />;
+        }
+        return (
+          <p key={i} className="text-sm text-text-secondary leading-relaxed">
+            {parseInline(trimmed)}
+          </p>
+        );
+      })}
+    </>
+  );
+}
+
+function parseInline(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*.*?\*\*|🚨|⚠️|✅|❌|💡|⏰|🔍|📅|📊|⬆️|🚶|🧘|🚴|🏊)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={i} className="text-text-primary font-semibold">{part.slice(2, -2)}</strong>;
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 export default function AIAssistantPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
       role: "assistant",
       content:
-        "Merhaba! 👋 Ben RenaCare AI sağlık asistanınızım. Böbrek nakli sonrası sürecinizle ilgili sorularınızı yanıtlamak için buradayım. İlaçlarınız, beslenmeniz veya genel sağlığınız hakkında merak ettiğiniz her şeyi sorabilirsiniz!",
+        "Merhaba! 👋 Ben RenaCare sağlık asistanınızım. Böbrek nakli sonrası sürecinizle ilgili sorularınızı yanıtlamak için buradayım. İlaçlarınız, beslenmeniz veya genel sağlığınız hakkında merak ettiğiniz her şeyi sorabilirsiniz!",
       timestamp: new Date(),
     },
   ]);
@@ -297,72 +371,85 @@ export default function AIAssistantPage() {
         id: "welcome",
         role: "assistant",
         content:
-          "Merhaba! 👋 Ben RenaCare AI sağlık asistanınızım. Böbrek nakli sonrası sürecinizle ilgili sorularınızı yanıtlamak için buradayım.",
+          "Merhaba! 👋 Ben RenaCare sağlık asistanınızım. Böbrek nakli sonrası sürecinizle ilgili sorularınızı yanıtlamak için buradayım.",
         timestamp: new Date(),
       },
     ]);
   };
 
   return (
-    <div className="max-w-4xl mx-auto h-[calc(100vh-120px)] flex flex-col">
+    <>
+      <PageTitle title="Genel Bilgi Asistanı" />
+      <div className="max-w-4xl mx-auto h-[calc(100vh-120px)] flex flex-col">
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-navy-500 to-teal-500 flex items-center justify-center">
-            <Bot className="text-white" size={22} />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-slate-900">AI Sağlık Asistanı</h1>
-              <DemoBadge text="Genel bilgi" />
+      <div className="bg-surface rounded-[var(--radius-xl)] border border-border p-4 mb-4 shadow-card">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-[var(--radius-lg)] bg-navy-600 flex items-center justify-center flex-shrink-0">
+              <Bot className="text-white" size={18} />
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-gentle-pulse" />
-              <span className="text-xs text-slate-500">Çevrimiçi</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base font-semibold text-text-primary">Genel Bilgi Asistanı</h1>
+                <DemoBadge text="Genel Bilgi" />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-success-500 rounded-full" />
+                <span className="text-xs text-text-tertiary">Çevrimiçi</span>
+              </div>
             </div>
           </div>
+          <Button variant="ghost" size="sm" onClick={clearChat}>
+            <Trash2 size={15} />
+            Temizle
+          </Button>
         </div>
-        <Button variant="ghost" size="sm" onClick={clearChat}>
-          <Trash2 size={16} />
-          Sohbeti Temizle
-        </Button>
+
+        {/* Prominent safety disclosure */}
+        <div className="mt-3 grid sm:grid-cols-3 gap-2">
+          {[
+            { icon: AlertCircle, text: "Tanı koymaz, ilaç dozu önermez", color: "text-danger-600 bg-danger-50 border-danger-200" },
+            { icon: ShieldAlert, text: "Doktor kararının yerini tutmaz", color: "text-warning-600 bg-warning-50 border-warning-200" },
+            { icon: PhoneCall, text: "Acilde 112'yi arayın", color: "text-info-600 bg-info-50 border-info-200" },
+          ].map((item, i) => (
+            <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-[var(--radius-md)] border ${item.color}`}>
+              <item.icon size={13} className={item.color.split(" ")[0]} />
+              <p className={`text-xs font-medium ${item.color.split(" ")[0]}`}>{item.text}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Emergency Banner */}
       {showEmergencyBanner && (
-        <div className="flex items-start gap-3 bg-red-50 border border-red-300 rounded-xl px-4 py-3 mb-4">
-          <PhoneCall size={18} className="text-red-600 flex-shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 bg-danger-50 border border-danger-200 rounded-[var(--radius-xl)] px-4 py-3 mb-4">
+          <PhoneCall size={16} className="text-danger-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-sm font-bold text-red-800">Acil Durum Tespit Edildi</p>
-            <p className="text-xs text-red-700 mt-0.5">
-              Bildirdiğiniz belirti acil tıbbi değerlendirme gerektirebilir. Nakil ekibinizi veya doktorunuzu arayın. Ulaşamazsanız <strong>112</strong>&apos;yi arayın veya en yakın acil servise gidin. Bu sohbet acil müdahale yerine geçmez.
+            <p className="text-sm font-semibold text-danger-800">Acil Durum Tespit Edildi</p>
+            <p className="text-xs text-danger-700 mt-0.5 leading-relaxed">
+              Bildirdiğiniz belirti acil tıbbi değerlendirme gerektirebilir. Nakil ekibinizi veya doktorunuzu arayın.
+              Ulaşamazsanız <strong>112</strong>'yi arayın. Bu sohbet acil müdahale yerine geçmez.
             </p>
           </div>
-          <button onClick={() => setShowEmergencyBanner(false)} className="text-red-400 hover:text-red-600 text-lg leading-none">&times;</button>
+          <button onClick={() => setShowEmergencyBanner(false)} className="text-danger-400 hover:text-danger-600 text-lg leading-none cursor-pointer">&times;</button>
         </div>
       )}
 
       {/* Prohibited Action Warning */}
       {showProhibitedWarning && (
-        <div className="flex items-start gap-3 bg-rose-50 border border-rose-300 rounded-xl px-4 py-3 mb-4">
-          <ShieldAlert size={18} className="text-rose-600 flex-shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 bg-warning-50 border border-warning-200 rounded-[var(--radius-xl)] px-4 py-3 mb-4">
+          <ShieldAlert size={16} className="text-warning-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-sm font-bold text-rose-800">Doz Değişikliği / İlaç Bırakma Talebi Algılandı</p>
-            <p className="text-xs text-rose-700 mt-0.5">
-              AI asistan ilaç dozu değiştirme, ilaç kesme veya yeni takviye başlatma önerisi veremez. Bu kararlar yalnızca doktorunuz tarafından verilmelidir. Lütfen doğrudan doktorunuzla iletişime geçin.
+            <p className="text-sm font-semibold text-warning-800">Doz Değişikliği / İlaç Bırakma Talebi</p>
+            <p className="text-xs text-warning-700 mt-0.5 leading-relaxed">
+              Genel Bilgi Asistanı ilaç dozu değiştirme, ilaç kesme veya yeni takviye başlatma önerisi veremez.
+              Bu kararlar yalnızca doktorunuz tarafından verilmelidir. Lütfen doktorunuzla iletişime geçin.
             </p>
           </div>
-          <button onClick={() => setShowProhibitedWarning(false)} className="text-rose-400 hover:text-rose-600 text-lg leading-none">&times;</button>
+          <button onClick={() => setShowProhibitedWarning(false)} className="text-warning-400 hover:text-warning-600 text-lg leading-none cursor-pointer">&times;</button>
         </div>
       )}
-
-      {/* Disclaimer */}
-      <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 mb-4">
-        <AlertCircle size={16} className="text-amber-500 flex-shrink-0" />
-        <p className="text-xs text-amber-700">
-          Bu AI asistan <strong>genel bilgi amaçlıdır</strong>, tıbbi tavsiye yerine geçmez ve ilaç dozu değiştiremez. Ciddi endişeleriniz için doktorunuza başvurun. Yanıtlar KDIGO/NKF kaynaklı rehberlerden derlenmiştir.
-        </p>
-      </div>
 
       {/* Chat Messages */}
       <Card className="flex-1 overflow-hidden flex flex-col" padding="sm">
@@ -375,40 +462,43 @@ export default function AIAssistantPage() {
               <div
                 className={`max-w-[85%] ${
                   message.role === "user"
-                    ? "bg-gradient-to-r from-navy-500 to-teal-600 text-white rounded-2xl rounded-br-md"
+                    ? "bg-navy-600 text-white rounded-[var(--radius-xl)] rounded-br-md"
                     : message.isEmergency
-                      ? "bg-red-50 border border-red-300 text-slate-800 rounded-2xl rounded-bl-md"
-                      : "bg-slate-50 text-slate-800 rounded-2xl rounded-bl-md"
+                      ? "bg-red-50 border border-red-300 text-text-primary rounded-[var(--radius-xl)] rounded-bl-md"
+                      : "bg-surface-muted text-text-primary rounded-[var(--radius-xl)] rounded-bl-md"
                 } p-4`}
               >
                 {message.role === "assistant" && (
                   <div className="flex items-center gap-2 mb-2">
-                    <Sparkles size={14} className="text-navy-500" />
-                    <span className="text-xs font-medium text-navy-500">
-                      RenaCare AI
+                    <span className="text-xs font-medium text-navy-600">
+                      RenaCare Asistan
                     </span>
-                    <span className="text-[10px] font-medium text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-medium text-warning-700 bg-warning-50 border border-warning-200 px-1.5 py-0.5 rounded">
                       Genel Bilgi
                     </span>
                     {message.isEmergency && (
-                      <span className="text-[10px] font-medium text-red-600 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-medium text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded">
                         Acil Yönlendirme
                       </span>
                     )}
                   </div>
                 )}
-                <div className="text-sm whitespace-pre-wrap leading-relaxed">
-                  {message.content}
+                <div className="leading-relaxed">
+                  {message.role === "assistant" ? (
+                    <MarkdownText text={message.content} />
+                  ) : (
+                    <p className="text-sm">{message.content}</p>
+                  )}
                 </div>
                 <div
                   className={`flex items-center justify-between mt-2 pt-2 border-t ${
                     message.role === "user"
                       ? "border-white/20"
-                      : "border-slate-200"
+                      : "border-border"
                   }`}
                 >
                   <span
-                    className={`text-[10px] ${message.role === "user" ? "text-white/70" : "text-slate-400"}`}
+                    className={`text-[10px] ${message.role === "user" ? "text-white/70" : "text-text-tertiary"}`}
                   >
                     {message.timestamp.toLocaleTimeString("tr-TR", {
                       hour: "2-digit",
@@ -423,8 +513,8 @@ export default function AIAssistantPage() {
                           disabled={message.forwarded}
                           className={`flex items-center gap-1 text-xs font-medium transition-colors cursor-pointer ${
                             message.forwarded
-                              ? "text-emerald-600"
-                              : "text-navy-500 hover:text-teal-700"
+                              ? "text-success-600"
+                              : "text-navy-600 hover:text-navy-700"
                           }`}
                         >
                           <Stethoscope size={12} />
@@ -433,7 +523,7 @@ export default function AIAssistantPage() {
                             : "Doktoruma Paylaş"}
                         </button>
                         {sharedMessageId === message.id && (
-                          <span className="text-[10px] text-emerald-600 font-medium">
+                          <span className="text-[10px] text-success-600 font-medium">
                             Mesaj doktor paneline iletildi
                           </span>
                         )}
@@ -446,11 +536,11 @@ export default function AIAssistantPage() {
 
           {isLoading && (
             <div className="flex justify-start animate-slide-up">
-              <div className="bg-slate-50 rounded-2xl rounded-bl-md p-4">
+              <div className="bg-surface-muted rounded-[var(--radius-xl)] rounded-bl-md p-4">
                 <div className="flex items-center gap-2">
-                  <Loader2 size={16} className="text-navy-500 animate-spin" />
-                  <span className="text-sm text-slate-500">
-                    AI düşünüyor...
+                  <Loader2 size={16} className="text-navy-600 animate-spin" />
+                  <span className="text-sm text-text-secondary">
+                    Yanıt hazırlanıyor...
                   </span>
                 </div>
               </div>
@@ -462,18 +552,21 @@ export default function AIAssistantPage() {
         {/* Suggested Questions */}
         {messages.length <= 1 && (
           <div className="p-4 pt-0">
-            <p className="text-xs text-slate-400 mb-2">
-              Öneri sorular:
-            </p>
+            <p className="text-xs font-medium text-text-muted mb-2.5">Örnek sorular:</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {suggestedQuestions.map((q, i) => (
                 <button
                   key={i}
                   onClick={() => sendMessage(q.text)}
-                  className={`flex items-center gap-2 p-3 rounded-xl border text-left text-sm transition-all hover:shadow-sm cursor-pointer ${q.color}`}
+                  className="flex items-start gap-2.5 p-3 rounded-[var(--radius-lg)] border border-border bg-surface hover:bg-surface-muted text-left transition-colors cursor-pointer group"
                 >
-                  <q.icon size={16} className="flex-shrink-0" />
-                  <span>{q.text}</span>
+                  <span className={`w-7 h-7 rounded-[var(--radius-md)] flex items-center justify-center flex-shrink-0 mt-0.5 ${q.iconBg}`}>
+                    <q.icon size={13} className={q.iconColor} />
+                  </span>
+                  <div>
+                    <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wide">{q.category}</span>
+                    <p className="text-xs text-text-secondary leading-snug mt-0.5 group-hover:text-text-primary transition-colors">{q.text}</p>
+                  </div>
                 </button>
               ))}
             </div>
@@ -481,7 +574,7 @@ export default function AIAssistantPage() {
         )}
 
         {/* Input */}
-        <div className="p-4 border-t border-slate-100">
+        <div className="p-4 border-t border-border">
           <div className="flex gap-2">
             <input
               ref={inputRef}
@@ -490,7 +583,7 @@ export default function AIAssistantPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
               placeholder="Sağlığınızla ilgili bir soru sorun..."
-              className="modern-field flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent"
+              className="flex-1 rounded-[var(--radius-lg)] border border-border bg-surface px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted transition-all duration-200 focus:outline-none focus:ring-[3px] focus:ring-navy-500/15 focus:border-navy-400 hover:border-border-strong"
               disabled={isLoading}
             />
             <Button
@@ -503,5 +596,6 @@ export default function AIAssistantPage() {
         </div>
       </Card>
     </div>
+    </>
   );
 }

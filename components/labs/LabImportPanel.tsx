@@ -243,11 +243,11 @@ export default function LabImportPanel({
   };
 
   return (
-    <div className="space-y-5 rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+    <div className="space-y-5 rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-bold text-slate-900">Laboratuvar Import Merkezi</p>
-          <p className="text-xs text-slate-400">{patientName} icin e-Nabız, PDF, Excel veya kopyala-yapıştır ile sonuç ekleyin.</p>
+          <p className="text-sm font-bold text-text-primary">Laboratuvar Import Merkezi</p>
+          <p className="text-xs text-text-muted">{patientName} icin e-Nabız, PDF, Excel veya kopyala-yapıştır ile sonuç ekleyin.</p>
         </div>
         <div className="flex gap-2">
           {[
@@ -259,10 +259,10 @@ export default function LabImportPanel({
               key={item.id}
               type="button"
               onClick={() => setMode(item.id as Mode)}
-              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
+              className={`flex items-center gap-2 rounded-[var(--radius-lg)] border px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
                 mode === item.id
                   ? "border-teal-200 bg-teal-50 text-teal-700"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                  : "border-border bg-surface text-text-secondary hover:border-border-strong"
               }`}
             >
               <item.icon size={14} />
@@ -276,22 +276,22 @@ export default function LabImportPanel({
         <div className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Rapor Tarihi</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary">Rapor Tarihi</label>
               <input
                 type="date"
                 value={reportDate}
                 onChange={(event) => setReportDate(event.target.value)}
-                className="modern-field w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                className="modern-field w-full rounded-[var(--radius-lg)] border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">Not</label>
+              <label className="mb-1 block text-xs font-medium text-text-secondary">Not</label>
               <input
                 type="text"
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
                 placeholder="Ornek: e-Nabiz 26 Nisan paneli"
-                className="modern-field w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                className="modern-field w-full rounded-[var(--radius-lg)] border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
               />
             </div>
           </div>
@@ -303,12 +303,12 @@ export default function LabImportPanel({
                 value={rawText}
                 onChange={(event) => setRawText(event.target.value)}
                 placeholder="e-Nabiz, web sitesi veya PDF'den laboratuvar metnini yapistirin..."
-                className="modern-field w-full resize-none rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                className="modern-field w-full resize-none rounded-[var(--radius-xl)] border border-border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
               />
               <button
                 type="button"
                 onClick={parseRawTextInput}
-                className="rounded-xl bg-teal-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-600 transition-colors cursor-pointer"
+                className="rounded-[var(--radius-lg)] bg-teal-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-600 transition-colors cursor-pointer"
               >
                 Yapiştırılan Metni Ayrıştır
               </button>
@@ -317,7 +317,7 @@ export default function LabImportPanel({
 
           {mode === "file" && (
             <div className="space-y-3">
-              <label className="flex cursor-pointer items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center hover:border-teal-300 hover:bg-teal-50/60 transition-colors">
+              <label className="flex cursor-pointer items-center justify-center rounded-[var(--radius-xl)] border border-dashed border-border bg-surface-muted px-4 py-10 text-center hover:border-teal-300 hover:bg-teal-50/60 transition-colors">
                 <input
                   type="file"
                   accept=".pdf,.xlsx,.xls,.csv,.txt,.tsv"
@@ -325,24 +325,24 @@ export default function LabImportPanel({
                   className="hidden"
                 />
                 <span className="space-y-2">
-                  <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm">
+                  <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-[var(--radius-xl)] bg-surface shadow-card">
                     <FileSpreadsheet size={20} className="text-teal-600" />
                   </span>
-                  <span className="block text-sm font-semibold text-slate-700">
+                  <span className="block text-sm font-semibold text-text-secondary">
                     PDF, Excel veya CSV yukle
                   </span>
-                  <span className="block text-xs text-slate-400">
+                  <span className="block text-xs text-text-muted">
                     e-Nabiz PDF, laboratuvar Excel listesi veya metin dosyası desteklenir
                   </span>
                 </span>
               </label>
               {busy && (
-                <div className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                <div className="flex items-center gap-2 rounded-[var(--radius-lg)] bg-surface-muted px-3 py-2 text-sm text-text-secondary">
                   <Loader2 size={15} className="animate-spin" />
                   Dosya işleniyor...
                 </div>
               )}
-              {fileName && <p className="text-xs text-slate-500">Seçilen dosya: {fileName}</p>}
+              {fileName && <p className="text-xs text-text-tertiary">Seçilen dosya: {fileName}</p>}
             </div>
           )}
 
@@ -354,7 +354,7 @@ export default function LabImportPanel({
 
                 return (
                   <div key={key}>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">
+                    <label className="mb-1 block text-xs font-medium text-text-secondary">
                       {metric.label} ({metric.unit})
                     </label>
                     <input
@@ -364,7 +364,7 @@ export default function LabImportPanel({
                         setManualValues((prev) => ({ ...prev, [key]: event.target.value }))
                       }
                       placeholder={metric.normalMin.toString()}
-                      className="modern-field w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                      className="modern-field w-full rounded-[var(--radius-lg)] border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
                     />
                   </div>
                 );
@@ -374,7 +374,7 @@ export default function LabImportPanel({
                 <button
                   type="button"
                   onClick={parseManualInput}
-                  className="rounded-xl bg-teal-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-600 transition-colors cursor-pointer"
+                  className="rounded-[var(--radius-lg)] bg-teal-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-600 transition-colors cursor-pointer"
                 >
                   Manuel Girdiyi Hazirla
                 </button>
@@ -383,23 +383,23 @@ export default function LabImportPanel({
           )}
 
           {error && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <div className="rounded-[var(--radius-lg)] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
               {error}
             </div>
           )}
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+        <div className="rounded-[var(--radius-xl)] border border-border bg-surface-muted p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-bold text-slate-900">Önizleme</p>
-              <p className="text-xs text-slate-400">Kaydetmeden önce ayrıştırılan değerleri kontrol edin.</p>
+              <p className="text-sm font-bold text-text-primary">Önizleme</p>
+              <p className="text-xs text-text-muted">Kaydetmeden önce ayrıştırılan değerleri kontrol edin.</p>
             </div>
             <button
               type="button"
               onClick={savePreview}
               disabled={preview.length === 0}
-              className="rounded-xl bg-emerald-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-[var(--radius-lg)] bg-emerald-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="flex items-center gap-2">
                 <Save size={13} />
@@ -410,16 +410,16 @@ export default function LabImportPanel({
 
           <div className="mt-4 space-y-3">
             {previewCards.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-400">
+              <div className="rounded-[var(--radius-xl)] border border-dashed border-border bg-surface px-4 py-8 text-center text-sm text-text-muted">
                 Henüz önizleme yok.
               </div>
             ) : (
               previewCards.map(({ point, metrics }, index) => (
-                <div key={`${point.date}-${index}`} className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div key={`${point.date}-${index}`} className="rounded-[var(--radius-xl)] border border-border bg-surface p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">{point.date}</p>
-                      <p className="text-xs text-slate-400">{point.sourceType} importu</p>
+                      <p className="text-sm font-semibold text-text-primary">{point.date}</p>
+                      <p className="text-xs text-text-muted">{point.sourceType} importu</p>
                     </div>
                     <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
                       {metrics.length} metrik
@@ -431,9 +431,9 @@ export default function LabImportPanel({
                       const metric = LAB_METRIC_DEFINITIONS.find((item) => item.key === metricKey);
                       if (!metric) return null;
                       return (
-                        <div key={metricKey} className="rounded-xl bg-slate-50 px-3 py-2">
-                          <p className="text-[11px] font-medium text-slate-500">{metric.label}</p>
-                          <p className="text-sm font-bold text-slate-900">
+                        <div key={metricKey} className="rounded-[var(--radius-lg)] bg-surface-muted px-3 py-2">
+                          <p className="text-[11px] font-medium text-text-tertiary">{metric.label}</p>
+                          <p className="text-sm font-bold text-text-primary">
                             {renderValue(point[metricKey])} {metric.unit}
                           </p>
                         </div>

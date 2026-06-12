@@ -14,7 +14,7 @@ export default function Avatar({ src, name, size = "md", className }: AvatarProp
   return (
     <div
       className={cn(
-        "rounded-full flex items-center justify-center font-medium bg-gradient-to-br from-teal-400 to-emerald-500 text-white",
+        "rounded-full flex items-center justify-center font-medium bg-navy-600 text-white",
         size === "sm" && "w-8 h-8 text-xs",
         size === "md" && "w-10 h-10 text-sm",
         size === "lg" && "w-14 h-14 text-lg",

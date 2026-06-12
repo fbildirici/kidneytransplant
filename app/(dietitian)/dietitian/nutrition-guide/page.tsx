@@ -2,8 +2,9 @@
 import { useState } from "react";
 import {
   BookOpen, CheckCircle, AlertTriangle, Ban, ChevronDown, ChevronUp,
-  Droplets, Flame, Apple, Info,
+  Info,
 } from "lucide-react";
+import PageTitle from "@/components/PageTitle";
 
 const categories = [
   {
@@ -84,35 +85,35 @@ export default function NutritionGuidePage() {
   const [expanded, setExpanded] = useState<string | null>("recommended");
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <>
+      <PageTitle title="Beslenme Rehberi" />
+      <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-green-600 p-6 sm:p-7 text-white shadow-xl shadow-emerald-500/20">
-        <div className="absolute -right-10 -top-10 w-52 h-52 bg-white/5 rounded-full blur-2xl" />
-        <div className="absolute inset-0 dot-pattern opacity-10" />
+      <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-medical-700 p-6 sm:p-7 text-white shadow-elevated">
         <div className="relative">
           <div className="flex items-center gap-2 mb-2">
             <BookOpen size={15} className="text-green-300" />
             <span className="text-green-300 text-sm font-semibold">Klinik Rehber</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white mb-1.5">Beslenme Rehberi</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1.5">Beslenme Rehberi</h1>
           <p className="text-white/60 text-sm">Böbrek nakli sonrası beslenme kuralları ve klinik öneriler.</p>
         </div>
       </div>
 
       {/* Key Nutrient Limits */}
-      <div className="bg-white rounded-2xl border border-slate-200/70 shadow-[0_1px_4px_-2px_rgba(0,0,0,0.06),0_4px_12px_-6px_rgba(5,150,105,0.07)] p-5">
+      <div className="bg-surface rounded-[var(--radius-xl)] border border-border shadow-[0_1px_4px_-2px_rgba(0,0,0,0.06),0_4px_12px_-6px_rgba(5,150,105,0.07)] p-5">
         <div className="flex items-center gap-2 mb-4">
           <Info className="text-emerald-600" size={18} />
-          <h2 className="font-bold text-slate-900 text-sm">Temel Besin Limitleri</h2>
+          <h2 className="font-bold text-text-primary text-sm">Temel Besin Limitleri</h2>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {nutrients.map((n, i) => (
-            <div key={i} className={`flex items-start gap-3 p-4 rounded-xl border ${n.color}`}>
+            <div key={i} className={`flex items-start gap-3 p-4 rounded-[var(--radius-lg)] border ${n.color}`}>
               <span className="text-2xl flex-shrink-0">{n.icon}</span>
               <div>
-                <p className="text-sm font-bold text-slate-900">{n.label}</p>
+                <p className="text-sm font-bold text-text-primary">{n.label}</p>
                 <p className="text-xs font-semibold text-emerald-700 mt-0.5">{n.range}</p>
-                <p className="text-xs text-slate-500 mt-1">{n.desc}</p>
+                <p className="text-xs text-text-tertiary mt-1">{n.desc}</p>
               </div>
             </div>
           ))}
@@ -121,30 +122,30 @@ export default function NutritionGuidePage() {
 
       {/* Food Categories */}
       <div className="space-y-3">
-        <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">Gıda Kategorileri</h2>
+        <h2 className="text-sm font-bold text-text-secondary uppercase tracking-wide">Gıda Kategorileri</h2>
         {categories.map((cat) => {
           const isOpen = expanded === cat.id;
           return (
-            <div key={cat.id} className="bg-white rounded-2xl border border-slate-200/70 shadow-[0_1px_4px_-2px_rgba(0,0,0,0.06),0_4px_12px_-6px_rgba(5,150,105,0.07)] overflow-hidden">
+            <div key={cat.id} className="bg-surface rounded-[var(--radius-xl)] border border-border shadow-[0_1px_4px_-2px_rgba(0,0,0,0.06),0_4px_12px_-6px_rgba(5,150,105,0.07)] overflow-hidden">
               <button onClick={() => setExpanded(isOpen ? null : cat.id)}
-                className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50/50 transition-colors cursor-pointer">
+                className="w-full flex items-center justify-between px-5 py-4 hover:bg-surface-muted transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl ${cat.bg} flex items-center justify-center`}>
+                  <div className={`w-10 h-10 rounded-[var(--radius-lg)] ${cat.bg} flex items-center justify-center`}>
                     <cat.icon className={cat.color} size={20} />
                   </div>
                   <div className="text-left">
-                    <p className="font-semibold text-slate-900">{cat.title}</p>
-                    <p className="text-xs text-slate-400">{cat.items.length} gıda</p>
+                    <p className="font-semibold text-text-primary">{cat.title}</p>
+                    <p className="text-xs text-text-muted">{cat.items.length} gıda</p>
                   </div>
                 </div>
-                {isOpen ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
+                {isOpen ? <ChevronUp size={18} className="text-text-muted" /> : <ChevronDown size={18} className="text-text-muted" />}
               </button>
               {isOpen && (
                 <div className="px-5 pb-5">
                   <div className="grid sm:grid-cols-2 gap-2">
                     {cat.items.map((item, i) => (
-                      <div key={i} className={`p-3 rounded-xl border ${cat.border} ${cat.bg}`}>
-                        <p className="text-sm font-semibold text-slate-900">{item.name}</p>
+                      <div key={i} className={`p-3 rounded-[var(--radius-lg)] border ${cat.border} ${cat.bg}`}>
+                        <p className="text-sm font-semibold text-text-primary">{item.name}</p>
                         <p className={`text-xs mt-0.5 ${cat.color}`}>{item.note}</p>
                       </div>
                     ))}
@@ -157,7 +158,7 @@ export default function NutritionGuidePage() {
       </div>
 
       {/* Important Notes */}
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+      <div className="bg-amber-50 border border-amber-200 rounded-[var(--radius-xl)] p-5">
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle className="text-amber-600" size={18} />
           <h2 className="font-bold text-amber-900 text-sm">Önemli Klinik Notlar</h2>
@@ -172,5 +173,6 @@ export default function NutritionGuidePage() {
         </ul>
       </div>
     </div>
+    </>
   );
 }

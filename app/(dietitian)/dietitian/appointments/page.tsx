@@ -1,8 +1,11 @@
 import ProviderAppointmentsManager from "@/components/appointments/ProviderAppointmentsManager";
+import PageTitle from "@/components/PageTitle";
 
 export default function DietitianAppointmentsPage() {
   return (
-    <ProviderAppointmentsManager
+    <>
+      <PageTitle title="Randevularım" />
+      <ProviderAppointmentsManager
       providerRole="dietitian"
       providerName="Dyt. Zeynep Arslan"
       specialty="Klinik Beslenme"
@@ -14,5 +17,6 @@ export default function DietitianAppointmentsPage() {
         strong: "bg-emerald-500 hover:bg-emerald-600",
       }}
     />
+    </>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import { Bell, Search, Menu, Pill, MessageSquare, Calendar, Activity, CheckCircle, X, TrendingUp } from "lucide-react";
+import { Bell, Menu, Pill, MessageSquare, Calendar, Activity, CheckCircle, X, TrendingUp } from "lucide-react";
 import Avatar from "@/components/ui/Avatar";
 import { useState, useRef, useEffect } from "react";
 import MobileNav from "./MobileNav";
@@ -96,6 +96,7 @@ export default function Header() {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") setNotifOpen(false);
+
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
@@ -127,17 +128,6 @@ export default function Header() {
           >
             <Menu size={20} />
           </button>
-
-          {/* Search */}
-          <div className="flex items-center gap-2.5 bg-surface-muted rounded-[var(--radius-lg)] px-3.5 py-2 flex-1 max-w-sm border border-border focus-within:border-border-strong focus-within:ring-[3px] focus-within:ring-navy-500/10 transition-all group">
-            <Search size={16} className="text-text-tertiary flex-shrink-0 group-focus-within:text-navy-500 transition-colors" />
-            <input
-              type="text"
-              placeholder="Ara..."
-              className="bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none w-full"
-              aria-label="Ara"
-            />
-          </div>
 
           {/* Right section */}
           <div className="flex items-center gap-2">
@@ -190,7 +180,7 @@ export default function Header() {
                     )}
                   </div>
 
-                  <div className="max-h-[380px] overflow-y-auto divide-y divide-border-subtle">
+                  <div className="max-h-[380px] overflow-y-auto divide-y divide-border">
                     {notifications.length === 0 ? (
                       <div className="py-10 text-center">
                         <Bell size={24} className="mx-auto text-text-muted mb-2" />

@@ -17,7 +17,6 @@ import {
 import {
   Activity,
   Apple,
-  Calendar,
   FilePlus2,
   Pill,
   Plus,
@@ -25,6 +24,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import PageTitle from "@/components/PageTitle";
 
 const DOCTOR_NAME = "Dr. Ayşe Kaya";
 const DIETITIAN_NAME = "Dyt. Zeynep Arslan";
@@ -168,22 +168,23 @@ export default function DoctorDashboard() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-600 via-teal-500 to-emerald-600 p-6 sm:p-7 text-white shadow-xl shadow-teal-500/20">
-        <div className="absolute inset-0 dot-pattern opacity-10" />
+    <>
+      <PageTitle title="Doktor Paneli" />
+      <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-navy-700 p-6 sm:p-7 text-white shadow-elevated">
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Stethoscope size={15} className="text-emerald-300" />
-              <span className="text-emerald-300 text-sm font-semibold">Doktor Paneli</span>
+              <Stethoscope size={15} className="text-white/70" />
+              <span className="text-white/70 text-sm font-semibold">Doktor Paneli</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white mb-1.5">Nakil Hasta Yönetimi</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1.5">Nakil Hasta Yönetimi</h1>
             <p className="text-white/65 text-sm">Yeni hasta kaydı, ilk ilaç dozu, diyet planı ve laboratuvar başlangıç verisini tek yerden yönetin.</p>
           </div>
           <button
             type="button"
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-teal-700 shadow-lg shadow-teal-900/15 transition-colors hover:bg-white/90 cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-[var(--radius-lg)] bg-surface px-4 py-3 text-sm font-semibold text-teal-700 shadow-elevated shadow-teal-900/15 transition-colors hover:bg-white/90 cursor-pointer"
           >
             <Plus size={16} />
             Yeni Hasta Aç
@@ -192,26 +193,26 @@ export default function DoctorDashboard() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl bg-white border border-slate-200/70 p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Aktif Hasta</p>
-          <p className="mt-2 text-3xl font-black text-slate-900">{stats.total}</p>
+        <div className="rounded-[var(--radius-xl)] bg-surface border border-border p-5 shadow-card">
+          <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Aktif Hasta</p>
+          <p className="mt-2 text-3xl font-bold text-text-primary">{stats.total}</p>
         </div>
-        <div className="rounded-2xl bg-white border border-slate-200/70 p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Kritik Hasta</p>
-          <p className="mt-2 text-3xl font-black text-red-600">{stats.critical}</p>
+        <div className="rounded-[var(--radius-xl)] bg-surface border border-border p-5 shadow-card">
+          <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Kritik Hasta</p>
+          <p className="mt-2 text-3xl font-bold text-red-600">{stats.critical}</p>
         </div>
-        <div className="rounded-2xl bg-white border border-slate-200/70 p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ort. Kreatinin</p>
-          <p className="mt-2 text-3xl font-black text-slate-900">{stats.avgCreatinine}</p>
-          <p className="text-xs text-slate-400">mg/dL</p>
+        <div className="rounded-[var(--radius-xl)] bg-surface border border-border p-5 shadow-card">
+          <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Ort. Kreatinin</p>
+          <p className="mt-2 text-3xl font-bold text-text-primary">{stats.avgCreatinine}</p>
+          <p className="text-xs text-text-muted">mg/dL</p>
         </div>
-        <div className="rounded-2xl bg-white border border-slate-200/70 p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hızlı Erişim</p>
+        <div className="rounded-[var(--radius-xl)] bg-surface border border-border p-5 shadow-card">
+          <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Hızlı Erişim</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Link href="/doctor/labs" className="rounded-xl bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-700">
+            <Link href="/doctor/labs" className="rounded-[var(--radius-lg)] bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-700">
               Laboratuvar Merkezi
             </Link>
-            <Link href="/doctor/appointments" className="rounded-xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700">
+            <Link href="/doctor/appointments" className="rounded-[var(--radius-lg)] bg-slate-100 px-3 py-2 text-xs font-semibold text-text-secondary">
               Randevular
             </Link>
           </div>
@@ -219,35 +220,35 @@ export default function DoctorDashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[360px,1fr]">
-        <div className="rounded-2xl border border-slate-200/70 bg-white shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="rounded-[var(--radius-xl)] border border-border bg-surface shadow-card overflow-hidden">
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-slate-900">Hastalar</p>
-              <p className="text-xs text-slate-400">Doktorun yönettiği tüm kayıtlar</p>
+              <p className="text-sm font-bold text-text-primary">Hastalar</p>
+              <p className="text-xs text-text-muted">Doktorun yönettiği tüm kayıtlar</p>
             </div>
             <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
               {patients.length}
             </span>
           </div>
 
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-border">
             {patients.map((patient) => (
               <button
                 key={patient.id}
                 type="button"
                 onClick={() => setSelectedPatientId(patient.id)}
                 className={`w-full text-left px-5 py-4 transition-colors cursor-pointer ${
-                  selectedPatientId === patient.id ? "bg-teal-50/70" : "hover:bg-slate-50/70"
+                  selectedPatientId === patient.id ? "bg-teal-50/70" : "hover:bg-surface-muted"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center text-white text-sm font-bold">
+                    <div className="w-10 h-10 rounded-[var(--radius-lg)] bg-medical-500 flex items-center justify-center text-white text-sm font-bold">
                       {patient.initials}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">{patient.name}</p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-sm font-semibold text-text-primary">{patient.name}</p>
+                      <p className="text-xs text-text-muted">
                         Kreatinin {patient.creatinine} · Tac {patient.tacrolimusLevel}
                       </p>
                     </div>
@@ -264,100 +265,100 @@ export default function DoctorDashboard() {
         <div className="space-y-6">
           {selectedPatient ? (
             <>
-              <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+              <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <Users size={15} className="text-teal-600" />
                       <span className="text-xs font-semibold uppercase tracking-wide text-teal-700">Hasta Kartı</span>
                     </div>
-                    <h2 className="text-2xl font-black text-slate-900">{selectedPatient.name}</h2>
-                    <p className="text-sm text-slate-500">
+                    <h2 className="text-2xl font-bold text-text-primary">{selectedPatient.name}</h2>
+                    <p className="text-sm text-text-tertiary">
                       Nakil: {selectedPatient.transplantDate} · Kan Grubu: {selectedPatient.bloodGroup} · BMI: {selectedPatient.bmi}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Link href="/doctor/labs" className="rounded-xl bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-700">
+                    <Link href="/doctor/labs" className="rounded-[var(--radius-lg)] bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-700">
                       Lab Gir
                     </Link>
-                    <Link href="/doctor/appointments" className="rounded-xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700">
+                    <Link href="/doctor/appointments" className="rounded-[var(--radius-lg)] bg-slate-100 px-3 py-2 text-xs font-semibold text-text-secondary">
                       Randevu Takvimi
                     </Link>
                   </div>
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Son Kreatinin</p>
-                    <p className="mt-1 text-2xl font-black text-slate-900">{selectedPatient.creatinine}</p>
+                  <div className="rounded-[var(--radius-xl)] bg-surface-muted p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Son Kreatinin</p>
+                    <p className="mt-1 text-2xl font-bold text-text-primary">{selectedPatient.creatinine}</p>
                   </div>
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tacrolimus</p>
-                    <p className="mt-1 text-2xl font-black text-slate-900">{selectedPatient.tacrolimusLevel}</p>
+                  <div className="rounded-[var(--radius-xl)] bg-surface-muted p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Tacrolimus</p>
+                    <p className="mt-1 text-2xl font-bold text-text-primary">{selectedPatient.tacrolimusLevel}</p>
                   </div>
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">İlaç Sayısı</p>
-                    <p className="mt-1 text-2xl font-black text-slate-900">{selectedMeds.length}</p>
+                  <div className="rounded-[var(--radius-xl)] bg-surface-muted p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">İlaç Sayısı</p>
+                    <p className="mt-1 text-2xl font-bold text-text-primary">{selectedMeds.length}</p>
                   </div>
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Son Ziyaret</p>
-                    <p className="mt-1 text-2xl font-black text-slate-900">{selectedPatient.lastVisit}</p>
+                  <div className="rounded-[var(--radius-xl)] bg-surface-muted p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Son Ziyaret</p>
+                    <p className="mt-1 text-2xl font-bold text-text-primary">{selectedPatient.lastVisit}</p>
                   </div>
                 </div>
               </div>
 
               <div className="grid gap-6 xl:grid-cols-2">
-                <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+                <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
                   <div className="flex items-center gap-2 mb-4">
                     <Pill size={18} className="text-teal-600" />
-                    <p className="text-sm font-bold text-slate-900">Başlangıç / Güncel İlaç Planı</p>
+                    <p className="text-sm font-bold text-text-primary">Başlangıç / Güncel İlaç Planı</p>
                   </div>
                   <div className="space-y-3">
                     {selectedMeds.length === 0 ? (
-                      <p className="text-sm text-slate-400">Henüz ilaç planı tanımlanmamış.</p>
+                      <p className="text-sm text-text-muted">Henüz ilaç planı tanımlanmamış.</p>
                     ) : (
                       selectedMeds.map((medication) => (
-                        <div key={medication.id} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                          <p className="text-sm font-semibold text-slate-900">{medication.name}</p>
-                          <p className="text-xs text-slate-500">
+                        <div key={medication.id} className="rounded-[var(--radius-xl)] border border-border bg-surface-muted p-4">
+                          <p className="text-sm font-semibold text-text-primary">{medication.name}</p>
+                          <p className="text-xs text-text-tertiary">
                             {medication.dosage} · {medication.frequency} · {medication.times.join(", ")}
                           </p>
-                          {medication.notes && <p className="mt-2 text-xs text-slate-500">{medication.notes}</p>}
+                          {medication.notes && <p className="mt-2 text-xs text-text-tertiary">{medication.notes}</p>}
                         </div>
                       ))
                     )}
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+                <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
                   <div className="flex items-center gap-2 mb-4">
                     <Apple size={18} className="text-emerald-600" />
-                    <p className="text-sm font-bold text-slate-900">Diyet Planı Özeti</p>
+                    <p className="text-sm font-bold text-text-primary">Diyet Planı Özeti</p>
                   </div>
                   {selectedDiet ? (
                     <div className="space-y-3">
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-2xl bg-emerald-50 p-4">
+                        <div className="rounded-[var(--radius-xl)] bg-emerald-50 p-4">
                           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Kalori</p>
-                          <p className="mt-1 text-xl font-black text-slate-900">{selectedDiet.calorieTarget} kcal</p>
+                          <p className="mt-1 text-xl font-bold text-text-primary">{selectedDiet.calorieTarget} kcal</p>
                         </div>
-                        <div className="rounded-2xl bg-emerald-50 p-4">
+                        <div className="rounded-[var(--radius-xl)] bg-emerald-50 p-4">
                           <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Protein</p>
-                          <p className="mt-1 text-xl font-black text-slate-900">{selectedDiet.proteinTarget}</p>
+                          <p className="mt-1 text-xl font-bold text-text-primary">{selectedDiet.proteinTarget}</p>
                         </div>
                       </div>
-                      <p className="text-sm text-slate-600">{selectedDiet.notes || "Ek not girilmemiş."}</p>
+                      <p className="text-sm text-text-secondary">{selectedDiet.notes || "Ek not girilmemiş."}</p>
                     </div>
                   ) : (
-                    <p className="text-sm text-slate-400">Henüz diyet planı oluşturulmamış.</p>
+                    <p className="text-sm text-text-muted">Henüz diyet planı oluşturulmamış.</p>
                   )}
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+              <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
                 <div className="flex items-center gap-2 mb-4">
                   <Activity size={18} className="text-cyan-600" />
-                  <p className="text-sm font-bold text-slate-900">En Son Laboratuvar Özeti</p>
+                  <p className="text-sm font-bold text-text-primary">En Son Laboratuvar Özeti</p>
                 </div>
                 {selectedLabs ? (
                   <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
@@ -369,29 +370,29 @@ export default function DoctorDashboard() {
                       { label: "Potasyum", value: selectedLabs.potassium, unit: "mmol/L" },
                       { label: "Fosfor", value: selectedLabs.phosphorus, unit: "mg/dL" },
                     ].map((item) => (
-                      <div key={item.label} className="rounded-2xl bg-cyan-50 p-4">
+                      <div key={item.label} className="rounded-[var(--radius-xl)] bg-cyan-50 p-4">
                         <p className="text-xs font-semibold uppercase tracking-wide text-cyan-700">{item.label}</p>
-                        <p className="mt-1 text-xl font-black text-slate-900">
+                        <p className="mt-1 text-xl font-bold text-text-primary">
                           {item.value !== undefined ? item.value : "-"} {item.unit}
                         </p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-400">Hasta için laboratuvar kaydı bulunmuyor.</p>
+                  <p className="text-sm text-text-muted">Hasta için laboratuvar kaydı bulunmuyor.</p>
                 )}
               </div>
 
-              <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+              <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
                 <div className="flex items-center gap-2 mb-3">
                   <TrendingUp size={18} className="text-violet-600" />
-                  <p className="text-sm font-bold text-slate-900">Epikriz / Klinik Not</p>
+                  <p className="text-sm font-bold text-text-primary">Epikriz / Klinik Not</p>
                 </div>
-                <p className="text-sm leading-6 text-slate-600">{selectedPatient.epicrisis}</p>
+                <p className="text-sm leading-6 text-text-secondary">{selectedPatient.epicrisis}</p>
               </div>
             </>
           ) : (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-sm text-slate-400">
+            <div className="rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-surface p-10 text-center text-sm text-text-muted">
               Hastaları görmek için önce bir kayıt seçin.
             </div>
           )}
@@ -410,32 +411,32 @@ export default function DoctorDashboard() {
               { key: "bmi", label: "BMI" },
             ].map((field) => (
               <div key={field.key}>
-                <label className="mb-1 block text-xs font-medium text-slate-600">{field.label}</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">{field.label}</label>
                 <input
                   type={field.type || "text"}
                   value={form[field.key as keyof typeof form]}
                   onChange={(event) => setForm((prev) => ({ ...prev, [field.key]: event.target.value }))}
-                  className="modern-field w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  className="modern-field w-full rounded-[var(--radius-lg)] border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
                 />
               </div>
             ))}
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Epikriz</label>
+            <label className="mb-1 block text-xs font-medium text-text-secondary">Epikriz</label>
             <textarea
               rows={3}
               value={form.epicrisis}
               onChange={(event) => setForm((prev) => ({ ...prev, epicrisis: event.target.value }))}
-              className="modern-field w-full resize-none rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="modern-field w-full resize-none rounded-[var(--radius-lg)] border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
             />
           </div>
 
           <div className="grid gap-5 lg:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="rounded-[var(--radius-xl)] border border-border bg-surface-muted p-4">
               <div className="mb-3 flex items-center gap-2">
                 <Pill size={16} className="text-teal-600" />
-                <p className="text-sm font-bold text-slate-900">İlk İlaç Dozu</p>
+                <p className="text-sm font-bold text-text-primary">İlk İlaç Dozu</p>
               </div>
               <div className="space-y-2">
                 {[
@@ -445,22 +446,22 @@ export default function DoctorDashboard() {
                   { key: "medicationTimes", label: "Saatler" },
                 ].map((field) => (
                   <div key={field.key}>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">{field.label}</label>
+                    <label className="mb-1 block text-xs font-medium text-text-secondary">{field.label}</label>
                     <input
                       type="text"
                       value={form[field.key as keyof typeof form]}
                       onChange={(event) => setForm((prev) => ({ ...prev, [field.key]: event.target.value }))}
-                      className="modern-field w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                      className="modern-field w-full rounded-[var(--radius-lg)] border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
                     />
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="rounded-[var(--radius-xl)] border border-border bg-surface-muted p-4">
               <div className="mb-3 flex items-center gap-2">
                 <Apple size={16} className="text-emerald-600" />
-                <p className="text-sm font-bold text-slate-900">İlk Diyet Planı</p>
+                <p className="text-sm font-bold text-text-primary">İlk Diyet Planı</p>
               </div>
               <div className="space-y-2">
                 {[
@@ -470,22 +471,22 @@ export default function DoctorDashboard() {
                   { key: "fluidLimit", label: "Sıvı" },
                 ].map((field) => (
                   <div key={field.key}>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">{field.label}</label>
+                    <label className="mb-1 block text-xs font-medium text-text-secondary">{field.label}</label>
                     <input
                       type="text"
                       value={form[field.key as keyof typeof form]}
                       onChange={(event) => setForm((prev) => ({ ...prev, [field.key]: event.target.value }))}
-                      className="modern-field w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                      className="modern-field w-full rounded-[var(--radius-lg)] border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
                     />
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="rounded-[var(--radius-xl)] border border-border bg-surface-muted p-4">
               <div className="mb-3 flex items-center gap-2">
                 <TrendingUp size={16} className="text-cyan-600" />
-                <p className="text-sm font-bold text-slate-900">İlk Laboratuvar</p>
+                <p className="text-sm font-bold text-text-primary">İlk Laboratuvar</p>
               </div>
               <div className="space-y-2">
                 {[
@@ -494,12 +495,12 @@ export default function DoctorDashboard() {
                   { key: "tacrolimus", label: "Tacrolimus" },
                 ].map((field) => (
                   <div key={field.key}>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">{field.label}</label>
+                    <label className="mb-1 block text-xs font-medium text-text-secondary">{field.label}</label>
                     <input
                       type="text"
                       value={form[field.key as keyof typeof form]}
                       onChange={(event) => setForm((prev) => ({ ...prev, [field.key]: event.target.value }))}
-                      className="modern-field w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                      className="modern-field w-full rounded-[var(--radius-lg)] border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400"
                     />
                   </div>
                 ))}
@@ -511,7 +512,7 @@ export default function DoctorDashboard() {
             <button
               type="button"
               onClick={() => setShowCreateModal(false)}
-              className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+              className="flex-1 rounded-[var(--radius-lg)] border border-border px-4 py-3 text-sm font-semibold text-text-secondary hover:bg-surface-muted cursor-pointer"
             >
               İptal
             </button>
@@ -519,7 +520,7 @@ export default function DoctorDashboard() {
               type="button"
               onClick={createNewPatient}
               disabled={!form.name.trim()}
-              className="flex-1 rounded-xl bg-teal-500 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="flex-1 rounded-[var(--radius-lg)] bg-teal-500 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <span className="flex items-center justify-center gap-2">
                 <FilePlus2 size={16} />
@@ -530,5 +531,6 @@ export default function DoctorDashboard() {
         </div>
       </Modal>
     </div>
+    </>
   );
 }

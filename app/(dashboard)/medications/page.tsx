@@ -8,7 +8,7 @@ import { getMedications, setMedications as storeSaveMedications } from "@/lib/st
 import {
   Pill, Plus, Check, Clock, Calendar, TrendingUp, Edit2, Trash2, Search, Stethoscope, Save,
 } from "lucide-react";
-import DemoBadge from "@/components/ui/DemoBadge";
+import PageTitle from "@/components/PageTitle";
 const MY_PATIENT_ID = "1";
 
 const CRITICAL_DRUG_PATTERNS = [
@@ -23,12 +23,12 @@ function isCriticalDrug(name: string): boolean {
 }
 
 const COLORS = [
-  "bg-teal-100 text-teal-700 border-teal-200",
-  "bg-emerald-100 text-emerald-700 border-emerald-200",
-  "bg-cyan-100 text-cyan-700 border-cyan-200",
-  "bg-sky-100 text-sky-700 border-sky-200",
-  "bg-violet-100 text-violet-700 border-violet-200",
-  "bg-indigo-100 text-indigo-700 border-indigo-200",
+  "bg-medical-50 text-medical-700 border-medical-200",
+  "bg-success-50 text-success-700 border-success-200",
+  "bg-navy-50 text-navy-700 border-navy-200",
+  "bg-navy-50 text-navy-700 border-navy-200",
+  "bg-medical-50 text-medical-700 border-medical-200",
+  "bg-navy-50 text-navy-700 border-navy-200",
 ];
 
 const FREQ_OPTIONS = ["Günde 1 kez", "Günde 2 kez", "Günde 3 kez", "Günde 4 kez", "Haftada 1 kez"];
@@ -152,110 +152,110 @@ export default function MedicationsPage() {
   const adherenceRate = Math.round((takenDoses / totalDoses) * 100);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy-600 via-navy-500 to-teal-600 p-6 sm:p-7 text-white shadow-xl shadow-navy-500/20">
-        <div className="absolute -right-10 -top-10 w-52 h-52 bg-white/5 rounded-full blur-2xl" />
-        <div className="absolute inset-0 dot-pattern opacity-10" />
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <>
+      <PageTitle title="İlaçlarım" />
+      <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="bg-surface rounded-[var(--radius-xl)] border border-border p-5 sm:p-6 shadow-card">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Pill size={15} className="text-teal-300" />
-              <span className="text-teal-300 text-sm font-semibold">İlaç Yönetimi</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white mb-1.5">İlaç Takibi</h1>
-            <p className="text-white/60 text-sm">İlaçlarınızı düzenli takip edin, sağlığınızı koruyun.</p>
+            <p className="text-xs font-semibold text-navy-600 uppercase tracking-widest mb-1">İlaç Takibi</p>
+            <h1 className="text-xl sm:text-2xl font-semibold text-text-primary mb-1">
+              Bugünkü İlaçlarım
+            </h1>
+            <p className="text-sm text-text-secondary">
+              Saat, doz ve alındı durumunu güvenle takip edin.
+            </p>
           </div>
-          <button
-            onClick={openAddModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white text-navy-700 hover:bg-white/92 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-navy-900/15 flex-shrink-0"
-          >
+          <Button size="sm" onClick={openAddModal}>
             <Plus size={15} />
-            Yeni İlaç Ekle
-          </button>
+            İlaç Ekle
+          </Button>
+        </div>
+
+        {/* Safety note */}
+        <div className="mt-4 flex items-start gap-2 bg-warning-50 border border-warning-200 rounded-[var(--radius-lg)] px-4 py-3">
+          <Stethoscope size={14} className="text-warning-600 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-warning-700 leading-relaxed">
+            <span className="font-semibold">İlaç dozunuzu yalnızca doktorunuzun önerisiyle değiştirin.</span>{" "}
+            Bu ekran takip amaçlıdır. Yeni ilaç ekleme veya mevcut dozu değiştirme kararı doktorunuza aittir.
+            {medications.length > 0 && medications[0].prescribedBy && medications[0].prescribedBy !== "Hasta" && (
+              <span> İlaçlarınız <strong>{medications[0].prescribedBy}</strong> tarafından yazılmıştır.</span>
+            )}
+          </p>
         </div>
       </div>
 
-      {/* Doctor prescribed notice */}
-      {medications.length > 0 && medications[0].prescribedBy && (
-        <div className="flex items-center gap-3 p-4 bg-teal-50 border border-teal-200 rounded-2xl">
-          <Stethoscope size={18} className="text-teal-600 flex-shrink-0" />
-          <p className="text-sm text-teal-800">
-            İlaçlarınız <span className="font-bold">{medications[0].prescribedBy}</span> tarafından yazılmıştır. Değişiklik için doktorunuzla iletişime geçin.
-          </p>
-        </div>
-      )}
-
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="stat-card-navy rounded-2xl p-5">
+        <div className="stat-card-navy rounded-[var(--radius-xl)] p-5">
           <div className="flex items-start justify-between mb-4">
-            <div className="w-11 h-11 rounded-xl bg-navy-500 flex items-center justify-center shadow-lg shadow-navy-500/25">
+            <div className="w-11 h-11 rounded-[var(--radius-lg)] bg-navy-500 flex items-center justify-center shadow-lg shadow-navy-500/25">
               <Pill className="text-white" size={19} />
             </div>
-            <span className="text-xs font-semibold text-navy-400 bg-white/70 px-2 py-0.5 rounded-full">Aktif</span>
+            <span className="text-xs font-semibold text-navy-400 bg-surface/70 px-2 py-0.5 rounded-full">Aktif</span>
           </div>
           <p className="text-xs font-semibold text-navy-500/70 uppercase tracking-wide mb-0.5">Aktif İlaç</p>
-          <p className="text-3xl font-black text-navy-700">{medications.filter((m) => m.active).length}</p>
+          <p className="text-3xl font-bold text-navy-700">{medications.filter((m) => m.active).length}</p>
         </div>
-        <div className="stat-card-emerald rounded-2xl p-5">
+        <div className="stat-card-emerald rounded-[var(--radius-xl)] p-5">
           <div className="flex items-start justify-between mb-4">
-            <div className="w-11 h-11 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+            <div className="w-11 h-11 rounded-[var(--radius-lg)] bg-success-500 flex items-center justify-center shadow-subtle">
               <Check className="text-white" size={19} />
             </div>
-            <span className="text-xs font-semibold text-emerald-600 bg-white/70 px-2 py-0.5 rounded-full">Bugün</span>
+            <span className="text-xs font-semibold text-success-600 bg-surface/70 px-2 py-0.5 rounded-full">Bugün</span>
           </div>
-          <p className="text-xs font-semibold text-emerald-600/70 uppercase tracking-wide mb-0.5">Alınan Doz</p>
-          <p className="text-3xl font-black text-emerald-700">
-            {takenDoses}<span className="text-xl text-emerald-500">/{totalDoses}</span>
+          <p className="text-xs font-semibold text-success-600/70 uppercase tracking-wide mb-0.5">Alınan Doz</p>
+          <p className="text-3xl font-bold text-success-700">
+            {takenDoses}<span className="text-xl text-success-500">/{totalDoses}</span>
           </p>
         </div>
-        <div className="stat-card-cyan rounded-2xl p-5">
+        <div className="stat-card-cyan rounded-[var(--radius-xl)] p-5">
           <div className="flex items-start justify-between mb-4">
-            <div className="w-11 h-11 rounded-xl bg-cyan-500 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+            <div className="w-11 h-11 rounded-[var(--radius-lg)] bg-medical-500 flex items-center justify-center shadow-subtle">
               <TrendingUp className="text-white" size={19} />
             </div>
-            <span className="text-xs font-semibold text-cyan-600 bg-white/70 px-2 py-0.5 rounded-full">Oran</span>
+            <span className="text-xs font-semibold text-medical-600 bg-surface/70 px-2 py-0.5 rounded-full">Oran</span>
           </div>
-          <p className="text-xs font-semibold text-cyan-600/70 uppercase tracking-wide mb-0.5">Uyum Oranı</p>
-          <p className="text-3xl font-black text-cyan-700">%{isNaN(adherenceRate) ? 0 : adherenceRate}</p>
+          <p className="text-xs font-semibold text-medical-600/70 uppercase tracking-wide mb-0.5">Uyum Oranı</p>
+          <p className="text-3xl font-bold text-medical-700">%{isNaN(adherenceRate) ? 0 : adherenceRate}</p>
         </div>
-        <div className="stat-card-violet rounded-2xl p-5">
+        <div className="stat-card-violet rounded-[var(--radius-xl)] p-5">
           <div className="flex items-start justify-between mb-4">
-            <div className="w-11 h-11 rounded-xl bg-violet-500 flex items-center justify-center shadow-lg shadow-violet-500/25">
+            <div className="w-11 h-11 rounded-[var(--radius-lg)] bg-navy-500 flex items-center justify-center shadow-subtle">
               <Calendar className="text-white" size={19} />
             </div>
-            <span className="text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">Demo</span>
+            <span className="text-xs font-semibold text-warning-600 bg-warning-50 border border-warning-200 px-2 py-0.5 rounded-full">Demo</span>
           </div>
-          <p className="text-xs font-semibold text-violet-600/70 uppercase tracking-wide mb-0.5">Gün Serisi</p>
-          <p className="text-3xl font-black text-violet-700">12</p>
+          <p className="text-xs font-semibold text-navy-600/70 uppercase tracking-wide mb-0.5">Gün Serisi</p>
+          <p className="text-3xl font-bold text-navy-700">12</p>
         </div>
       </div>
 
       {/* Weekly Adherence Chart */}
       <Card>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-slate-900">Haftalık İlaç Uyumu</h2>
-          <span className="text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">Örnek veri</span>
+          <h2 className="font-semibold text-text-primary">Haftalık İlaç Uyumu</h2>
+          <span className="text-xs font-semibold text-warning-600 bg-warning-50 border border-warning-200 px-2 py-0.5 rounded-full">Örnek veri</span>
         </div>
         <div className="flex items-end justify-between gap-2 h-32">
           {weeklyAdherence.map((day) => {
             const pct = (day.taken / day.total) * 100;
             return (
               <div key={day.day} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full bg-slate-100 rounded-lg overflow-hidden h-20 flex flex-col justify-end">
+                <div className="w-full bg-surface-muted rounded-[var(--radius-md)] overflow-hidden h-20 flex flex-col justify-end">
                   <div
-                    className={`w-full rounded-lg transition-all duration-500 ${
+                    className={`w-full rounded-[var(--radius-md)] transition-all duration-500 ${
                       pct === 100
-                        ? "bg-gradient-to-t from-navy-500 to-teal-400"
+                        ? "bg-navy-500"
                         : pct >= 80
-                          ? "bg-gradient-to-t from-navy-400 to-teal-300"
-                          : "bg-gradient-to-t from-amber-400 to-amber-300"
+                          ? "bg-navy-400"
+                          : "bg-amber-400"
                     }`}
                     style={{ height: `${pct}%` }}
                   />
                 </div>
-                <span className="text-xs text-slate-500 font-medium">
+                <span className="text-xs text-text-secondary font-medium">
                   {day.day}
                 </span>
               </div>
@@ -270,7 +270,7 @@ export default function MedicationsPage() {
           <div className="flex items-center justify-between p-4 pb-2">
             <div className="flex items-center gap-2">
               <Clock className="text-navy-500" size={20} />
-              <h2 className="font-semibold text-slate-900">
+              <h2 className="font-semibold text-text-primary">
                 Bugünkü Program
               </h2>
             </div>
@@ -278,7 +278,7 @@ export default function MedicationsPage() {
               {takenDoses}/{totalDoses} alındı
             </Badge>
           </div>
-          <div className="divide-y divide-slate-50">
+          <div className="divide-y divide-border">
             {medications.map((med) =>
               med.times.map((time) => {
                 const key = `${med.id}-${time}`;
@@ -286,15 +286,15 @@ export default function MedicationsPage() {
                 return (
                   <div
                     key={key}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-slate-50/50 transition-colors"
+                    className="flex items-center justify-between px-4 py-3 hover:bg-surface-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => toggleTaken(key)}
-                        className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all duration-300 cursor-pointer ${
+                        className={`w-7 h-7 rounded-[var(--radius-md)] border-2 flex items-center justify-center transition-all duration-300 cursor-pointer ${
                           isTaken
-                            ? "bg-gradient-to-r from-navy-500 to-teal-500 border-transparent scale-110"
-                            : "border-slate-300 hover:border-navy-400"
+                            ? "bg-navy-500 border-transparent scale-110"
+                            : "border-border-hover hover:border-navy-400"
                         }`}
                       >
                         {isTaken && (
@@ -303,22 +303,22 @@ export default function MedicationsPage() {
                       </button>
                       <div>
                         <p
-                          className={`text-sm font-medium ${isTaken ? "text-slate-400 line-through" : "text-slate-900"}`}
+                          className={`text-sm font-medium ${isTaken ? "text-text-tertiary line-through" : "text-text-primary"}`}
                         >
                           {med.name}
                         </p>
-                        <p className="text-xs text-slate-400">{med.dosage}</p>
+                        <p className="text-xs text-text-tertiary">{med.dosage}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5 text-slate-500">
+                      <div className="flex items-center gap-1.5 text-text-secondary">
                         <Clock size={14} />
                         <span className="text-sm">{time}</span>
                       </div>
                       {isTaken ? (
-                        <Badge variant="success">Alındı</Badge>
+                        <Badge variant="success"><Check size={10} /> Alındı</Badge>
                       ) : (
-                        <Badge variant="warning">Bekliyor</Badge>
+                        <Badge variant="warning"><Clock size={10} /> Bekliyor</Badge>
                       )}
                     </div>
                   </div>
@@ -333,14 +333,14 @@ export default function MedicationsPage() {
           <div className="relative">
             <Search
               size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary"
             />
             <input
               type="text"
               placeholder="İlaç ara..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="modern-field w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent"
+              className="modern-field w-full pl-9 pr-4 py-2.5 rounded-[var(--radius-lg)] border border-border text-sm focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent"
             />
           </div>
           {filteredMedications.map((med) => (
@@ -351,10 +351,10 @@ export default function MedicationsPage() {
                     className={`w-3 h-3 rounded-full mt-1.5 ${med.color.split(" ")[0]}`}
                   />
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">
+                    <p className="text-sm font-semibold text-text-primary">
                       {med.name}
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-text-secondary mt-0.5">
                       {med.dosage} • {med.frequency}
                     </p>
                     <div className="flex gap-1 mt-2">
@@ -365,17 +365,17 @@ export default function MedicationsPage() {
                       ))}
                     </div>
                     {med.notes && (
-                      <p className="text-xs text-slate-400 mt-2">
+                      <p className="text-xs text-text-tertiary mt-2">
                         {med.notes}
                       </p>
                     )}
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => openEditModal(med)} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer">
+                  <button onClick={() => openEditModal(med)} className="p-1.5 rounded-[var(--radius-md)] text-text-tertiary hover:bg-surface-muted hover:text-text-secondary transition-colors cursor-pointer">
                     <Edit2 size={14} />
                   </button>
-                  <button onClick={() => deleteMedication(med.id)} className="p-1.5 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer">
+                  <button onClick={() => deleteMedication(med.id)} className="p-1.5 rounded-[var(--radius-md)] text-text-tertiary hover:bg-danger-50 hover:text-danger-500 transition-colors cursor-pointer">
                     <Trash2 size={14} />
                   </button>
                 </div>
@@ -394,52 +394,52 @@ export default function MedicationsPage() {
       >
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-slate-700">İlaç Adı</label>
+            <label className="block text-sm font-medium text-text-secondary">İlaç Adı</label>
             <input
               value={medForm.name}
               onChange={(e) => setMedForm((p) => ({ ...p, name: e.target.value }))}
               placeholder="Örn: Tacrolimus"
-              className="modern-field w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent"
+              className="modern-field w-full rounded-[var(--radius-lg)] border border-border bg-surface px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-slate-700">Doz</label>
+              <label className="block text-sm font-medium text-text-secondary">Doz</label>
               <input
                 value={medForm.dosage}
                 onChange={(e) => setMedForm((p) => ({ ...p, dosage: e.target.value }))}
                 placeholder="Örn: 2mg"
-                className="modern-field w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent"
+                className="modern-field w-full rounded-[var(--radius-lg)] border border-border bg-surface px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-slate-700">Sıklık</label>
+              <label className="block text-sm font-medium text-text-secondary">Sıklık</label>
               <select
                 value={medForm.frequency}
                 onChange={(e) => setMedForm((p) => ({ ...p, frequency: e.target.value }))}
-                className="modern-field modern-select w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent"
+                className="modern-field modern-select w-full rounded-[var(--radius-lg)] border border-border bg-surface px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent"
               >
                 {FREQ_OPTIONS.map((f) => <option key={f}>{f}</option>)}
               </select>
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-slate-700">Alım Saatleri <span className="text-slate-400 font-normal">(virgülle ayırın)</span></label>
+            <label className="block text-sm font-medium text-text-secondary">Alım Saatleri <span className="text-text-tertiary font-normal">(virgülle ayırın)</span></label>
             <input
               value={medForm.times}
               onChange={(e) => setMedForm((p) => ({ ...p, times: e.target.value }))}
               placeholder="08:00,20:00"
-              className="modern-field w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent"
+              className="modern-field w-full rounded-[var(--radius-lg)] border border-border bg-surface px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-slate-700">Notlar</label>
+            <label className="block text-sm font-medium text-text-secondary">Notlar</label>
             <textarea
               rows={3}
               value={medForm.notes}
               onChange={(e) => setMedForm((p) => ({ ...p, notes: e.target.value }))}
               placeholder="İlaç hakkında notlarınız..."
-              className="modern-field w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent resize-none"
+              className="modern-field w-full rounded-[var(--radius-lg)] border border-border bg-surface px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-navy-400 focus:border-transparent resize-none"
             />
           </div>
           <div className="flex gap-3 pt-2">
@@ -454,5 +454,6 @@ export default function MedicationsPage() {
         </div>
       </Modal>
     </div>
+    </>
   );
 }

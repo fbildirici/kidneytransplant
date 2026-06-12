@@ -13,6 +13,7 @@ import {
   LabDataPoint,
 } from "@/lib/store";
 import { Activity, Database, FileText, UploadCloud, Users } from "lucide-react";
+import PageTitle from "@/components/PageTitle";
 
 const DOCTOR_NAME = "Dr. Ayşe Kaya";
 
@@ -33,45 +34,46 @@ export default function DoctorLabsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-600 via-teal-500 to-emerald-600 p-6 sm:p-7 text-white shadow-xl shadow-cyan-500/20">
-        <div className="absolute inset-0 dot-pattern opacity-10" />
+    <>
+      <PageTitle title="Hasta Laboratuvar" />
+      <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-navy-700 p-6 sm:p-7 text-white shadow-elevated">
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Activity size={15} className="text-cyan-100" />
-              <span className="text-cyan-100 text-sm font-semibold">Laboratuvar Merkezi</span>
+              <Activity size={15} className="text-white/70" />
+              <span className="text-white/70 text-sm font-semibold">Laboratuvar Merkezi</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white mb-1.5">PDF / Excel / Copy-Paste Laboratuvar Akışı</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1.5">PDF / Excel / Copy-Paste Laboratuvar Akışı</h1>
             <p className="text-white/70 text-sm">Doktor raporları sisteme atabilir, trendleri hem tek hasta hem tüm kohort için izleyebilir.</p>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white/10 border border-white/15 rounded-xl px-4 py-2.5 text-center">
+            <div className="bg-white/10 border border-white/15 rounded-[var(--radius-lg)] px-4 py-2.5 text-center">
               <p className="text-xs text-white/70 font-medium">Hasta</p>
-              <p className="text-xl font-black text-white">{patients.length}</p>
+              <p className="text-xl font-bold text-white">{patients.length}</p>
             </div>
-            <div className="bg-white/10 border border-white/15 rounded-xl px-4 py-2.5 text-center">
+            <div className="bg-white/10 border border-white/15 rounded-[var(--radius-lg)] px-4 py-2.5 text-center">
               <p className="text-xs text-white/70 font-medium">Retro</p>
-              <p className="text-xl font-black text-white">1000</p>
+              <p className="text-xl font-bold text-white">1000</p>
             </div>
-            <div className="bg-white/10 border border-white/15 rounded-xl px-4 py-2.5 text-center">
+            <div className="bg-white/10 border border-white/15 rounded-[var(--radius-lg)] px-4 py-2.5 text-center">
               <p className="text-xs text-white/70 font-medium">Import</p>
-              <p className="text-xl font-black text-white">{importHistory.length}</p>
+              <p className="text-xl font-bold text-white">{importHistory.length}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+      <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-bold text-slate-900">Hasta Seçimi</p>
-            <p className="text-xs text-slate-400">Laboratuvar ekleyeceğiniz veya trendini inceleyeceğiniz hastayı seçin.</p>
+            <p className="text-sm font-bold text-text-primary">Hasta Seçimi</p>
+            <p className="text-xs text-text-muted">Laboratuvar ekleyeceğiniz veya trendini inceleyeceğiniz hastayı seçin.</p>
           </div>
           <select
             value={selectedPatientId}
             onChange={(event) => setSelectedPatientId(event.target.value)}
-            className="modern-field modern-select rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400"
+            className="modern-field modern-select rounded-[var(--radius-lg)] border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text-secondary focus:outline-none focus:ring-2 focus:ring-teal-400"
           >
             {patients.map((patient) => (
               <option key={patient.id} value={patient.id}>
@@ -99,22 +101,22 @@ export default function DoctorLabsPage() {
         />
 
         <div className="space-y-4">
-          <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+          <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
             <div className="flex items-center gap-2 mb-4">
               <UploadCloud size={16} className="text-teal-600" />
-              <p className="text-sm font-bold text-slate-900">Son Import Geçmişi</p>
+              <p className="text-sm font-bold text-text-primary">Son Import Geçmişi</p>
             </div>
             <div className="space-y-3">
               {importHistory.length === 0 ? (
-                <p className="text-sm text-slate-400">Bu hasta için import geçmişi yok.</p>
+                <p className="text-sm text-text-muted">Bu hasta için import geçmişi yok.</p>
               ) : (
                 importHistory.map((item, index) => (
-                  <div key={`${item.date}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                    <p className="text-sm font-semibold text-slate-900">{item.date}</p>
-                    <p className="text-xs text-slate-500">
+                  <div key={`${item.date}-${index}`} className="rounded-[var(--radius-xl)] border border-border bg-surface-muted p-4">
+                    <p className="text-sm font-semibold text-text-primary">{item.date}</p>
+                    <p className="text-xs text-text-tertiary">
                       {item.sourceType} · {item.sourceFileName || item.sourceLabel || "Rapor"}
                     </p>
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-text-tertiary">
                       Kreatinin: {item.creatinine ?? "-"} · GFR: {item.gfr ?? "-"} · Tacrolimus: {item.tacrolimus ?? "-"}
                     </p>
                   </div>
@@ -123,12 +125,12 @@ export default function DoctorLabsPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+          <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
             <div className="flex items-center gap-2 mb-4">
               <FileText size={16} className="text-cyan-600" />
-              <p className="text-sm font-bold text-slate-900">Desteklenen Girdiler</p>
+              <p className="text-sm font-bold text-text-primary">Desteklenen Girdiler</p>
             </div>
-            <ul className="space-y-2 text-sm text-slate-600">
+            <ul className="space-y-2 text-sm text-text-secondary">
               <li>e-Nabız web ekranından kopyalanan metin</li>
               <li>PDF laboratuvar sonuç raporu</li>
               <li>Excel / CSV çok satırlı laboratuvar listesi</li>
@@ -140,16 +142,16 @@ export default function DoctorLabsPage() {
 
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="space-y-4">
-          <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+          <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
             <div className="flex items-center gap-2 mb-4">
               <Users size={16} className="text-teal-600" />
-              <p className="text-sm font-bold text-slate-900">Canlı Kohort Özeti</p>
+              <p className="text-sm font-bold text-text-primary">Canlı Kohort Özeti</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               {snapshotCards.map((card) => (
-                <div key={card.label} className="rounded-2xl bg-teal-50 p-4">
+                <div key={card.label} className="rounded-[var(--radius-xl)] bg-teal-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">{card.label}</p>
-                  <p className="mt-1 text-xl font-black text-slate-900">{card.value}</p>
+                  <p className="mt-1 text-xl font-bold text-text-primary">{card.value}</p>
                 </div>
               ))}
             </div>
@@ -165,19 +167,19 @@ export default function DoctorLabsPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+          <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-card">
             <div className="flex items-center gap-2 mb-4">
               <Database size={16} className="text-violet-600" />
-              <p className="text-sm font-bold text-slate-900">1000 Hastalık Retrospektif Analiz</p>
+              <p className="text-sm font-bold text-text-primary">1000 Hastalık Retrospektif Analiz</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {retrospective.metricSummaries.slice(0, 6).map((metric) => (
-                <div key={metric.key} className="rounded-2xl bg-violet-50 p-4">
+                <div key={metric.key} className="rounded-[var(--radius-xl)] bg-violet-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">{metric.label}</p>
-                  <p className="mt-1 text-xl font-black text-slate-900">
+                  <p className="mt-1 text-xl font-bold text-text-primary">
                     {metric.latestMean.toFixed(metric.key === "gfr" ? 0 : 1)} {metric.unit}
                   </p>
-                  <p className="text-xs text-slate-500">12 ay degisimi: {metric.change12m > 0 ? "+" : ""}{metric.change12m}</p>
+                  <p className="text-xs text-text-tertiary">12 ay degisimi: {metric.change12m > 0 ? "+" : ""}{metric.change12m}</p>
                 </div>
               ))}
             </div>
@@ -193,5 +195,6 @@ export default function DoctorLabsPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

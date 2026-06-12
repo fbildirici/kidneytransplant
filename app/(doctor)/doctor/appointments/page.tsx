@@ -1,8 +1,11 @@
 import ProviderAppointmentsManager from "@/components/appointments/ProviderAppointmentsManager";
+import PageTitle from "@/components/PageTitle";
 
 export default function DoctorAppointmentsPage() {
   return (
-    <ProviderAppointmentsManager
+    <>
+      <PageTitle title="Randevu Yönetimi" />
+      <ProviderAppointmentsManager
       providerRole="doctor"
       providerName="Dr. Ayşe Kaya"
       specialty="Nefroloji"
@@ -14,5 +17,6 @@ export default function DoctorAppointmentsPage() {
         strong: "bg-teal-500 hover:bg-teal-600",
       }}
     />
+    </>
   );
 }

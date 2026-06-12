@@ -21,7 +21,7 @@ const navItems = [
   { href: "/nutrition", label: "Beslenme", icon: Apple },
   { href: "/messages", label: "Mesajlar", icon: MessageSquare },
   { href: "/appointments", label: "Randevular", icon: Calendar },
-  { href: "/ai-assistant", label: "Akıllı Asistan", icon: Bot },
+  { href: "/ai-assistant", label: "Sağlık Asistanı", icon: Bot },
   { href: "/profile", label: "Profil", icon: UserCircle },
 ];
 
@@ -36,8 +36,8 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
-      <div className="fixed inset-0 bg-black/30" onClick={onClose} />
+    <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Mobil menü">
+      <div className="fixed inset-0 bg-black/30" onClick={onClose} aria-hidden="true" />
       <div className="fixed left-0 top-0 bottom-0 w-72 bg-surface shadow-popover animate-slide-up">
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div className="flex items-center gap-2.5">
@@ -49,7 +49,7 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
               <p className="text-[10px] text-text-tertiary -mt-0.5">Hasta Takip Sistemi</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-[var(--radius-md)] text-text-tertiary hover:bg-surface-muted cursor-pointer">
+          <button onClick={onClose} className="p-1.5 rounded-[var(--radius-md)] text-text-tertiary hover:bg-surface-muted cursor-pointer" aria-label="Menüyü kapat">
             <X size={20} />
           </button>
         </div>
