@@ -8,6 +8,7 @@ import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import MobileNav from "./MobileNav";
 import type { ElementType } from "react";
+import { useAuth, getInitials, ROLE_LABELS } from "@/lib/auth-context";
 
 type AppRole = "patient" | "doctor" | "dietitian" | "coordinator";
 
@@ -146,7 +147,16 @@ function detectRole(pathname: string): AppRole {
 export default function Header() {
   const pathname = usePathname();
   const role = detectRole(pathname);
-  const profile = ROLE_PROFILES[role];
+  const { profile: authProfile } = useAuth();
+
+  // Use auth profile if available; fall back to hardcoded demo profile for display
+  const staticProfile = ROLE_PROFILES[role];
+  const displayName = authProfile?.displayName ?? staticProfile.name;
+  const shortName   = authProfile
+    ? displayName.split(" ").map((p: string, i: number) => i === 0 ? p : `${p[0]}.`).join(" ")
+    : staticProfile.shortName;
+  const roleLabel = authProfile ? ROLE_LABELS[authProfile.role] : staticProfile.role;
+  const profile = { name: displayName, shortName, role: roleLabel };
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);

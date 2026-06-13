@@ -6,7 +6,6 @@ import LabTrendExplorer from "@/components/labs/LabTrendExplorer";
 import { getLabImportHistory, getLabData, getPatient, LAB_METRIC_DEFINITIONS } from "@/lib/store";
 import type { LabDataPoint, LabMetricKey } from "@/lib/store";
 import { Activity, FileText, FileUp, TrendingUp, TrendingDown, Minus, Shield, Info } from "lucide-react";
-import DemoBadge from "@/components/ui/DemoBadge";
 import EmptyState from "@/components/ui/EmptyState";
 import PageTitle from "@/components/PageTitle";
 
@@ -93,7 +92,6 @@ export default function PatientLabsPage() {
               </p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <DemoBadge />
             </div>
           </div>
 

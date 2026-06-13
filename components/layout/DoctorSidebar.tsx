@@ -3,28 +3,28 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
-  MessageSquare,
-  Calendar,
-  HeartPulse,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-  Stethoscope,
-  Activity,
+  LayoutDashboard, MessageSquare, Calendar, HeartPulse,
+  ChevronLeft, ChevronRight, LogOut, Stethoscope, Activity,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth, getInitials } from "@/lib/auth-context";
 
 const navItems = [
-  { href: "/doctor", label: "Ana Panel", icon: LayoutDashboard },
-  { href: "/doctor/labs", label: "Laboratuvar", icon: Activity },
-  { href: "/doctor/messages", label: "Mesajlar", icon: MessageSquare, badge: 3 },
-  { href: "/doctor/appointments", label: "Randevular", icon: Calendar },
+  { href: "/doctor",              label: "Ana Panel",   icon: LayoutDashboard },
+  { href: "/doctor/labs",         label: "Laboratuvar", icon: Activity },
+  { href: "/doctor/messages",     label: "Mesajlar",    icon: MessageSquare, badge: 3 },
+  { href: "/doctor/appointments", label: "Randevular",  icon: Calendar },
 ];
 
 export default function DoctorSidebar() {
   const pathname = usePathname();
+  const { profile, signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+
+  const displayName = profile?.displayName ?? "Doktor";
+  const shortName   = displayName.split(" ").map((p, i) => i === 0 ? p : `${p[0]}.`).join(" ");
+  const initials    = getInitials(displayName);
+  const specialty   = profile?.specialty ?? "Nefrolog";
 
   return (
     <aside
@@ -34,18 +34,14 @@ export default function DoctorSidebar() {
       )}
     >
       {/* Logo */}
-      <div className={cn(
-        "flex items-center gap-2.5 border-b border-border transition-all duration-300",
-        collapsed ? "p-4 justify-center" : "p-5"
-      )}>
+      <div className={cn("flex items-center gap-2.5 border-b border-border transition-all duration-300", collapsed ? "p-4 justify-center" : "p-5")}>
         <div className="w-9 h-9 rounded-[var(--radius-lg)] bg-navy-700 flex items-center justify-center flex-shrink-0 shadow-elevated">
           <HeartPulse className="text-white" size={19} />
         </div>
         {!collapsed && (
           <div className="overflow-hidden">
             <h1 className="font-extrabold text-lg tracking-tight leading-tight">
-              <span className="text-navy-500">Rena</span>
-              <span className="text-teal-600">Care</span>
+              <span className="text-navy-500">Rena</span><span className="text-teal-600">Care</span>
             </h1>
             <p className="text-[10px] text-text-muted leading-tight">Doktor Paneli</p>
           </div>
@@ -54,11 +50,7 @@ export default function DoctorSidebar() {
 
       {/* Navigation */}
       <nav className={cn("flex-1 py-4 space-y-0.5 overflow-y-auto", collapsed ? "px-2" : "px-3")}>
-        {!collapsed && (
-          <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest px-3 pb-2">
-            Menü
-          </p>
-        )}
+        {!collapsed && <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest px-3 pb-2">Menü</p>}
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -69,71 +61,48 @@ export default function DoctorSidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-[var(--radius-lg)] text-sm font-medium transition-all duration-200",
                 collapsed ? "px-2.5 py-2.5 justify-center" : "px-3 py-2.5",
-                isActive
-                  ? "bg-navy-700 text-white shadow-elevated"
-                  : "text-text-tertiary hover:bg-surface-muted hover:text-text-primary"
+                isActive ? "bg-navy-700 text-white shadow-elevated" : "text-text-tertiary hover:bg-surface-muted hover:text-text-primary"
               )}
             >
-              <item.icon
-                size={19}
-                className={cn(
-                  "flex-shrink-0 transition-colors",
-                  isActive ? "text-white" : "text-text-muted"
-                )}
-              />
-              {!collapsed && (
-                <span className="flex-1">{item.label}</span>
-              )}
+              <item.icon size={19} className={cn("flex-shrink-0 transition-colors", isActive ? "text-white" : "text-text-muted")} />
+              {!collapsed && <span className="flex-1">{item.label}</span>}
               {!collapsed && "badge" in item && item.badge && (
-                <span className={cn(
-                  "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center",
-                  isActive ? "bg-surface/20 text-white" : "bg-red-500 text-white"
-                )}>
+                <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center", isActive ? "bg-surface/20 text-white" : "bg-red-500 text-white")}>
                   {item.badge}
                 </span>
               )}
-              {collapsed && "badge" in item && item.badge && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-              )}
+              {collapsed && "badge" in item && item.badge && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />}
             </Link>
           );
         })}
       </nav>
 
-      {/* Doctor profile + logout + collapse toggle */}
+      {/* Profile + logout + collapse */}
       <div className={cn("border-t border-border pt-3 pb-3 space-y-2", collapsed ? "px-2" : "px-3")}>
-        {/* Doctor info */}
-        <div
-          className={cn(
-            "flex items-center gap-2.5 rounded-[var(--radius-lg)] bg-teal-50 transition-all",
-            collapsed ? "p-2 justify-center" : "p-3"
-          )}
-        >
+        <div className={cn("flex items-center gap-2.5 rounded-[var(--radius-lg)] bg-teal-50 transition-all", collapsed ? "p-2 justify-center" : "p-3")}>
           <div className="w-8 h-8 rounded-lg bg-navy-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            <Stethoscope size={14} />
+            {initials || <Stethoscope size={14} />}
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-text-secondary truncate leading-tight">Dr. Ayşe Kaya</p>
-              <p className="text-xs text-teal-600 leading-tight font-medium">Nefrolog</p>
+              <p className="text-sm font-semibold text-text-secondary truncate leading-tight">{shortName}</p>
+              <p className="text-xs text-teal-600 leading-tight font-medium">{specialty}</p>
             </div>
           )}
         </div>
 
-        {/* Logout */}
-        <Link
-          href="/login"
+        <button
+          onClick={signOut}
           title={collapsed ? "Çıkış Yap" : undefined}
           className={cn(
-            "flex items-center rounded-[var(--radius-lg)] text-xs text-text-muted hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer",
+            "w-full flex items-center rounded-[var(--radius-lg)] text-xs text-text-muted hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer",
             collapsed ? "justify-center py-2 px-2" : "gap-1.5 py-2 px-3"
           )}
         >
           <LogOut size={15} />
           {!collapsed && <span>Çıkış Yap</span>}
-        </Link>
+        </button>
 
-        {/* Collapse toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
           title={collapsed ? "Genişlet" : "Daralt"}
@@ -142,14 +111,7 @@ export default function DoctorSidebar() {
             collapsed ? "justify-center py-2" : "justify-center gap-1.5 py-2"
           )}
         >
-          {collapsed ? (
-            <ChevronRight size={16} />
-          ) : (
-            <>
-              <ChevronLeft size={16} />
-              <span>Daralt</span>
-            </>
-          )}
+          {collapsed ? <ChevronRight size={16} /> : <><ChevronLeft size={16} /><span>Daralt</span></>}
         </button>
       </div>
     </aside>

@@ -11,7 +11,6 @@ import {
 import { useToast } from "@/lib/toast-context";
 import { Calendar, CalendarDays, CalendarX2, CheckCircle, Clock, UserRound, Users, XCircle, AlertCircle } from "lucide-react";
 import Badge from "@/components/ui/Badge";
-import DemoBadge from "@/components/ui/DemoBadge";
 import EmptyState from "@/components/ui/EmptyState";
 import PageTitle from "@/components/PageTitle";
 
@@ -77,7 +76,6 @@ export default function PatientAppointmentsPage() {
               Doktor veya diyetisyen için slot seçin. Talebiniz koordinatör onayından sonra kesinleşir; onaylandığında bildirim alırsınız.
             </p>
           </div>
-          <DemoBadge />
         </div>
         <div className="mt-4 flex items-start gap-2 bg-warning-50 border border-warning-200 rounded-[var(--radius-lg)] px-4 py-3">
           <AlertCircle size={14} className="text-warning-600 flex-shrink-0 mt-0.5" />

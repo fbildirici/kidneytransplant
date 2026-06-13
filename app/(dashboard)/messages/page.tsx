@@ -21,7 +21,6 @@ import {
   FileText,
   ShieldAlert,
 } from "lucide-react";
-import DemoBadge from "@/components/ui/DemoBadge";
 import EmptyState from "@/components/ui/EmptyState";
 import { useToast } from "@/lib/toast-context";
 import PageTitle from "@/components/PageTitle";
@@ -145,7 +144,6 @@ export default function MessagesPage() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <DemoBadge />
             <Button
               size="sm"
               onClick={() => { setShowNewModal(true); setSelectedTemplate(null); setNewMessage({ subject: "", content: "", urgency: "low" }); }}

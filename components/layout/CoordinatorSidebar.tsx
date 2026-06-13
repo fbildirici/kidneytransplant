@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { CalendarCheck2, CalendarPlus, ChevronLeft, ChevronRight, HeartPulse, LayoutDashboard, LogOut } from "lucide-react";
 import { useState } from "react";
+import { useAuth, getInitials } from "@/lib/auth-context";
 
 const navItems = [
   { href: "/coordinator",       label: "Onay Merkezi",  icon: LayoutDashboard },
@@ -13,7 +14,12 @@ const navItems = [
 
 export default function CoordinatorSidebar() {
   const pathname = usePathname();
+  const { profile, signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+
+  const displayName = profile?.displayName ?? "Koordinatör";
+  const shortName   = displayName.split(" ").map((p, i) => i === 0 ? p : `${p[0]}.`).join(" ");
+  const initials    = getInitials(displayName);
 
   return (
     <aside
@@ -64,26 +70,27 @@ export default function CoordinatorSidebar() {
       <div className={cn("border-t border-border pt-3 pb-3 space-y-2", collapsed ? "px-2" : "px-3")}>
         <div className={cn("flex items-center gap-2.5 rounded-[var(--radius-lg)] bg-cyan-50 transition-all", collapsed ? "p-2 justify-center" : "p-3")}>
           <div className="w-8 h-8 rounded-lg bg-navy-700 flex items-center justify-center text-white text-xs font-bold">
-            <CalendarCheck2 size={14} />
+            {initials || <CalendarCheck2 size={14} />}
           </div>
           {!collapsed && (
             <div>
-              <p className="text-sm font-semibold text-text-secondary">Selin Demir</p>
+              <p className="text-sm font-semibold text-text-secondary">{shortName}</p>
               <p className="text-xs text-cyan-600">Koordinatör</p>
             </div>
           )}
         </div>
 
-        <Link
-          href="/login"
+        <button
+          type="button"
+          onClick={signOut}
           className={cn(
-            "flex items-center rounded-[var(--radius-lg)] text-xs text-text-muted hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer",
+            "w-full flex items-center rounded-[var(--radius-lg)] text-xs text-text-muted hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer",
             collapsed ? "justify-center py-2 px-2" : "gap-1.5 py-2 px-3"
           )}
         >
           <LogOut size={15} />
           {!collapsed && <span>Çıkış Yap</span>}
-        </Link>
+        </button>
 
         <button
           type="button"

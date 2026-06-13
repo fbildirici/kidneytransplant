@@ -19,7 +19,6 @@ import {
   Save,
   LogOut,
 } from "lucide-react";
-import DemoBadge from "@/components/ui/DemoBadge";
 import { useToast } from "@/lib/toast-context";
 import PageTitle from "@/components/PageTitle";
 
@@ -51,7 +50,6 @@ export default function ProfilePage() {
             <h1 className="text-xl sm:text-2xl font-semibold text-text-primary mb-1">Hesap Bilgileri</h1>
             <p className="text-sm text-text-secondary">Kişisel bilgilerinizi, nakil verilerinizi ve bildirim tercihlerinizi yönetin.</p>
           </div>
-          <DemoBadge text="Örnek Profil" />
         </div>
       </div>
 

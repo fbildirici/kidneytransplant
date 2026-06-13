@@ -17,7 +17,6 @@ import {
   ShieldAlert,
   Stethoscope,
 } from "lucide-react";
-import DemoBadge from "@/components/ui/DemoBadge";
 import PageTitle from "@/components/PageTitle";
 
 const EMERGENCY_KEYWORDS = [
@@ -392,7 +391,6 @@ export default function AIAssistantPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base font-semibold text-text-primary">Genel Bilgi Asistanı</h1>
-                <DemoBadge text="Genel Bilgi" />
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 bg-success-500 rounded-full" />

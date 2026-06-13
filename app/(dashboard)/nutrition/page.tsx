@@ -16,7 +16,6 @@ import {
   Check,
   AlertCircle,
 } from "lucide-react";
-import DemoBadge from "@/components/ui/DemoBadge";
 import { useToast } from "@/lib/toast-context";
 import PageTitle from "@/components/PageTitle";
 import Link from "next/link";
@@ -70,7 +69,6 @@ export default function NutritionPage() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <DemoBadge />
             {!editing && plan && (
               <button
                 type="button"
