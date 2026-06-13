@@ -317,7 +317,7 @@ export default function LabImportPanel({
 
     const metricCount = preview.reduce((sum, p) => {
       const typed = Object.keys(p).filter(
-        (k) => k !== "date" && typeof (p as Record<string, unknown>)[k] === "number"
+        (k) => k !== "date" && typeof (p as unknown as Record<string, unknown>)[k] === "number"
       ).length;
       const raw = Object.keys(p.rawResults ?? {}).length;
       return sum + typed + raw;
