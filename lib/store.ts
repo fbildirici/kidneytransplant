@@ -774,6 +774,8 @@ const KEYS = {
   labData: (pid: string) => `renacare_labs_${pid}`,
   slots: "renacare_slots",
   slotsVersion: "renacare_slots_version",
+  messages: "renacare_messages",
+  messagesSeeded: "renacare_messages_seeded_v1",
 };
 
 function sortByDateAsc<T extends { date: string }>(items: T[]): T[] {
@@ -1145,4 +1147,165 @@ export function getCohortSnapshotCards() {
       value: latest?.tacrolimus !== undefined ? `${latest.tacrolimus.toFixed(1)} ng/mL` : "-",
     },
   ];
+}
+
+// ========================================================
+// MESSAGING SYSTEM
+// ========================================================
+
+export interface StoredMessage {
+  id: string;
+  patientId: string;
+  patientName: string;
+  patientInitials: string;
+  senderRole: "patient" | "doctor";
+  senderName: string;
+  subject: string;
+  content: string;
+  urgency: "low" | "medium" | "high";
+  sentAt: string;
+  readByDoctor: boolean;
+  replyContent?: string;
+  repliedAt?: string;
+  repliedBy?: string;
+}
+
+const DEFAULT_MESSAGES: StoredMessage[] = [
+  {
+    id: "msg_demo_1",
+    patientId: "1",
+    patientName: "Ahmet Yılmaz",
+    patientInitials: "AY",
+    senderRole: "patient",
+    senderName: "Ahmet Yılmaz",
+    subject: "Tacrolimus seviyesi hakkında",
+    content: "Sayın Dr. Kaya, son kan tahlilimde tacrolimus seviyem 12.5 ng/mL çıktı. Bu değer normal aralıkta mı? Endişelenmeli miyim? Biraz yorgunluk hissediyorum ayrıca.",
+    urgency: "medium",
+    sentAt: "2026-06-01T10:30:00.000Z",
+    readByDoctor: true,
+    replyContent: "Ahmet Bey, tacrolimus seviyeniz biraz yüksek (hedef 8-12 ng/mL). Şu anki dozunuzu 1.5mg'a düşürelim. 1 hafta sonra tekrar kan tahlili yaptırın. Yorgunluk bu değerle ilgili olabilir. İyi dileklerimle.",
+    repliedAt: "2026-06-01T14:20:00.000Z",
+    repliedBy: "Dr. Ayşe Kaya",
+  },
+  {
+    id: "msg_demo_2",
+    patientId: "1",
+    patientName: "Ahmet Yılmaz",
+    patientInitials: "AY",
+    senderRole: "patient",
+    senderName: "Ahmet Yılmaz",
+    subject: "Ayak bileğinde şişlik",
+    content: "Son birkaç gündür sağ ayak bileğimde hafif şişlik fark ettim. Ağrı yok ama endişeliyim. Acil bir durum olabilir mi?",
+    urgency: "high",
+    sentAt: "2026-06-05T08:15:00.000Z",
+    readByDoctor: true,
+    replyContent: "Ahmet Bey, ödem böbrek nakli hastalarında görülebilir. Ancak muayene etmem gerekiyor. Lütfen kliniğimizle yarın randevu alın. Tuz alımınızı azaltın ve ayaklarınızı yüksekte tutun. Dr. Kaya",
+    repliedAt: "2026-06-05T09:45:00.000Z",
+    repliedBy: "Dr. Ayşe Kaya",
+  },
+  {
+    id: "msg_demo_3",
+    patientId: "1",
+    patientName: "Ahmet Yılmaz",
+    patientInitials: "AY",
+    senderRole: "patient",
+    senderName: "Ahmet Yılmaz",
+    subject: "İlaç yan etkisi - Baş ağrısı",
+    content: "Mycophenolate almaya başladıktan sonra düzenli baş ağrıları yaşıyorum. Bu normal bir yan etki mi? Nasıl geçirebilirim?",
+    urgency: "medium",
+    sentAt: "2026-06-10T17:00:00.000Z",
+    readByDoctor: false,
+  },
+  {
+    id: "msg_demo_4",
+    patientId: "2",
+    patientName: "Fatma Demir",
+    patientInitials: "FD",
+    senderRole: "patient",
+    senderName: "Fatma Demir",
+    subject: "Potasyum kısıtlaması hakkında",
+    content: "Sayın Dr. Kaya, potasyum kısıtlaması nedeniyle hangi meyveleri yiyebileceğimi tam olarak anlayamadım. Elma ve armut uygun mu?",
+    urgency: "low",
+    sentAt: "2026-06-08T11:00:00.000Z",
+    readByDoctor: false,
+  },
+  {
+    id: "msg_demo_5",
+    patientId: "3",
+    patientName: "Mehmet Çelik",
+    patientInitials: "MÇ",
+    senderRole: "patient",
+    senderName: "Mehmet Çelik",
+    subject: "Ayak bileğinde şişlik - Acil",
+    content: "Dr. Kaya, son 2 gündür sağ ayak bileğimde ciddi şişlik var. Nefes almakta da biraz zorluk çekiyorum. Acil bir durum mu bu?",
+    urgency: "high",
+    sentAt: "2026-06-11T07:30:00.000Z",
+    readByDoctor: false,
+  },
+];
+
+function getAllMessages(): StoredMessage[] {
+  if (typeof window === "undefined") return DEFAULT_MESSAGES;
+  if (!localStorage.getItem(KEYS.messagesSeeded)) {
+    localStorage.setItem(KEYS.messages, JSON.stringify(DEFAULT_MESSAGES));
+    localStorage.setItem(KEYS.messagesSeeded, "1");
+  }
+  try {
+    return JSON.parse(localStorage.getItem(KEYS.messages) ?? "[]") as StoredMessage[];
+  } catch {
+    return DEFAULT_MESSAGES;
+  }
+}
+
+function saveAllMessages(msgs: StoredMessage[]): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(KEYS.messages, JSON.stringify(msgs));
+}
+
+export function getPatientMessages(patientId: string): StoredMessage[] {
+  return getAllMessages()
+    .filter((m) => m.patientId === patientId)
+    .sort((a, b) => b.sentAt.localeCompare(a.sentAt));
+}
+
+export function getDoctorMessages(): StoredMessage[] {
+  return getAllMessages().sort((a, b) => b.sentAt.localeCompare(a.sentAt));
+}
+
+export function sendPatientMessage(
+  msg: Omit<StoredMessage, "id" | "sentAt" | "readByDoctor">
+): StoredMessage {
+  const all = getAllMessages();
+  const newMsg: StoredMessage = {
+    ...msg,
+    id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    sentAt: new Date().toISOString(),
+    readByDoctor: false,
+  };
+  saveAllMessages([...all, newMsg]);
+  return newMsg;
+}
+
+export function replyToMessage(
+  messageId: string,
+  replyContent: string,
+  repliedBy: string
+): void {
+  const all = getAllMessages();
+  saveAllMessages(
+    all.map((m) =>
+      m.id === messageId
+        ? { ...m, replyContent, repliedAt: new Date().toISOString(), repliedBy, readByDoctor: true }
+        : m
+    )
+  );
+}
+
+export function markDoctorRead(messageIds: string[]): void {
+  const all = getAllMessages();
+  saveAllMessages(
+    all.map((m) =>
+      messageIds.includes(m.id) ? { ...m, readByDoctor: true } : m
+    )
+  );
 }

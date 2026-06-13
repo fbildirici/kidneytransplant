@@ -3,6 +3,13 @@
 
 import type { UserRole } from "./auth-context";
 
+export const DEMO_CREDENTIALS = {
+  patient:     { email: "hasta@demo.com",      password: "Demo1234", name: "Ahmet Yılmaz",       role: "Hasta" },
+  doctor:      { email: "doktor@demo.com",      password: "Demo1234", name: "Dr. Ayşe Kaya",      role: "Doktor" },
+  dietitian:   { email: "diyetisyen@demo.com",  password: "Demo1234", name: "Dyt. Zeynep Arslan", role: "Diyetisyen" },
+  coordinator: { email: "koordinator@demo.com", password: "Demo1234", name: "Selin Demir",         role: "Koordinatör" },
+} as const;
+
 export interface StoredUser {
   uid: string;
   email: string;
@@ -80,4 +87,66 @@ export function setSession(user: StoredUser): void {
 export function clearSession(): void {
   localStorage.removeItem(SESSION_KEY);
   document.cookie = "renacare-auth=; path=/; max-age=0";
+}
+
+const DEMO_SEEDED_KEY = "renacare_demo_seeded_v1";
+
+export function seedDemoUsers(): void {
+  if (typeof window === "undefined") return;
+  if (localStorage.getItem(DEMO_SEEDED_KEY)) return;
+
+  const demoUsers: StoredUser[] = [
+    {
+      uid: "1",
+      email: "hasta@demo.com",
+      password: "Demo1234",
+      firstName: "Ahmet",
+      lastName: "Yılmaz",
+      displayName: "Ahmet Yılmaz",
+      role: "patient",
+      transplantDate: "2023-06-15",
+      bloodGroup: "A Rh+",
+      doctorName: "Dr. Ayşe Kaya",
+      createdAt: "2026-01-01T00:00:00.000Z",
+    },
+    {
+      uid: "demo_doctor_1",
+      email: "doktor@demo.com",
+      password: "Demo1234",
+      firstName: "Ayşe",
+      lastName: "Kaya",
+      displayName: "Dr. Ayşe Kaya",
+      role: "doctor",
+      specialty: "Nefroloji",
+      createdAt: "2026-01-01T00:00:00.000Z",
+    },
+    {
+      uid: "demo_dietitian_1",
+      email: "diyetisyen@demo.com",
+      password: "Demo1234",
+      firstName: "Zeynep",
+      lastName: "Arslan",
+      displayName: "Dyt. Zeynep Arslan",
+      role: "dietitian",
+      specialty: "Klinik Beslenme",
+      createdAt: "2026-01-01T00:00:00.000Z",
+    },
+    {
+      uid: "demo_coordinator_1",
+      email: "koordinator@demo.com",
+      password: "Demo1234",
+      firstName: "Selin",
+      lastName: "Demir",
+      displayName: "Selin Demir",
+      role: "coordinator",
+      createdAt: "2026-01-01T00:00:00.000Z",
+    },
+  ];
+
+  const existing = getUsers();
+  const toAdd = demoUsers.filter(
+    (d) => !existing.some((e) => e.email.toLowerCase() === d.email.toLowerCase())
+  );
+  if (toAdd.length > 0) saveUsers([...existing, ...toAdd]);
+  localStorage.setItem(DEMO_SEEDED_KEY, "1");
 }

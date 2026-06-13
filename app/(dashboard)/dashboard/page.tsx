@@ -4,7 +4,8 @@ import Badge from "@/components/ui/Badge";
 import PageTitle from "@/components/PageTitle";
 import { useToast } from "@/lib/toast-context";
 import { getGreeting } from "@/lib/utils";
-import { getMedications, getSlots } from "@/lib/store";
+import { getMedications, getSlots, getLatestLabPoint } from "@/lib/store";
+import { useAuth } from "@/lib/auth-context";
 import {
   Pill,
   Droplets,
@@ -25,20 +26,21 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const MY_PATIENT_ID = "1";
-
 
 interface TodayMed { id: string; name: string; dosage: string; time: string; taken: boolean; }
 
 export default function DashboardPage() {
+  const { user, profile } = useAuth();
+  const patientId = user?.uid ?? "1";
+
   const [medications, setMedications] = useState<TodayMed[]>([]);
   const [undoableIds, setUndoableIds] = useState<Set<string>>(new Set());
   const toast = useToast();
-
+  const [latestLab, setLatestLab] = useState<{ creatinine?: number; tacrolimus?: number; gfr?: number; date?: string } | null>(null);
   const [upcomingAppointments, setUpcomingAppointments] = useState<{ id: string; date: string; time: string }[]>([]);
 
   useEffect(() => {
-    const stored = getMedications(MY_PATIENT_ID);
+    const stored = getMedications(patientId);
     const expanded: TodayMed[] = [];
     stored.forEach((med) => {
       med.times.forEach((time) => {
@@ -47,11 +49,13 @@ export default function DashboardPage() {
     });
     setMedications(expanded);
 
-    // Load patient's booked appointments from store
+    const lab = getLatestLabPoint(patientId);
+    if (lab) setLatestLab({ creatinine: lab.creatinine, tacrolimus: lab.tacrolimus, gfr: lab.gfr, date: lab.date });
+
     const today = new Date().toISOString().split("T")[0];
-    const slots = getSlots().filter((s) => s.status === "approved" && s.bookedByPatientId === MY_PATIENT_ID && s.date >= today);
+    const slots = getSlots().filter((s) => s.status === "approved" && s.bookedByPatientId === patientId && s.date >= today);
     setUpcomingAppointments(slots.slice(0, 2));
-  }, []);
+  }, [patientId]);
 
   const takenCount = medications.filter((m) => m.taken).length;
   const totalCount = medications.length;
@@ -97,7 +101,7 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-xs font-medium text-text-tertiary mb-1 uppercase tracking-wide">
-              {getGreeting()}
+              {getGreeting()}{profile?.firstName ? `, ${profile.firstName}` : ""}
             </p>
             <h1 className="text-xl sm:text-2xl font-semibold text-text-primary mb-1">
               Bugün takip etmeniz gerekenler
@@ -220,6 +224,42 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+
+      {/* ===== LAB SUMMARY ===== */}
+      {latestLab && (
+        <div className="bg-surface rounded-[var(--radius-xl)] border border-border shadow-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-[var(--radius-lg)] bg-info-50 flex items-center justify-center">
+                <FileText className="text-info-500" size={17} />
+              </div>
+              <div>
+                <h2 className="font-bold text-text-primary text-sm">Son Lab Değerleri</h2>
+                {latestLab.date && (
+                  <p className="text-xs text-text-tertiary">{latestLab.date}</p>
+                )}
+              </div>
+            </div>
+            <Link href="/labs" className="text-xs font-semibold text-navy-500 hover:text-navy-700 transition-colors flex items-center gap-1">
+              Tümünü Gör <ArrowRight size={12} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Kreatinin", value: latestLab.creatinine !== undefined ? `${latestLab.creatinine.toFixed(2)} mg/dL` : "-", normal: latestLab.creatinine !== undefined && latestLab.creatinine >= 0.7 && latestLab.creatinine <= 1.3 },
+              { label: "Tacrolimus", value: latestLab.tacrolimus !== undefined ? `${latestLab.tacrolimus.toFixed(1)} ng/mL` : "-", normal: latestLab.tacrolimus !== undefined && latestLab.tacrolimus >= 8 && latestLab.tacrolimus <= 12 },
+              { label: "GFR", value: latestLab.gfr !== undefined ? `${latestLab.gfr.toFixed(0)} mL/min` : "-", normal: latestLab.gfr !== undefined && latestLab.gfr >= 60 },
+            ].map((metric) => (
+              <div key={metric.label} className="rounded-[var(--radius-lg)] bg-surface-muted p-3 text-center">
+                <p className="text-xs text-text-tertiary mb-1">{metric.label}</p>
+                <p className={`text-base font-bold ${metric.value === "-" ? "text-text-muted" : metric.normal ? "text-success-600" : "text-warning-600"}`}>
+                  {metric.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ===== MAIN CONTENT ===== */}
       <div className="grid lg:grid-cols-3 gap-6 items-start">

@@ -14,6 +14,7 @@ import {
   StoredDietPlan,
   StoredMedication,
 } from "@/lib/store";
+import { useAuth } from "@/lib/auth-context";
 import {
   Activity,
   Apple,
@@ -26,8 +27,7 @@ import {
 } from "lucide-react";
 import PageTitle from "@/components/PageTitle";
 
-const DOCTOR_NAME = "Dr. Ayşe Kaya";
-const DIETITIAN_NAME = "Dyt. Zeynep Arslan";
+const DEFAULT_DIETITIAN_NAME = "Dyt. Zeynep Arslan";
 
 const emptyPatientForm = {
   name: "",
@@ -61,6 +61,10 @@ function statusBadge(status: PatientRecord["status"]) {
 }
 
 export default function DoctorDashboard() {
+  const { user } = useAuth();
+  const DOCTOR_NAME   = user?.displayName ?? "Dr. Ayşe Kaya";
+  const DIETITIAN_NAME = DEFAULT_DIETITIAN_NAME;
+
   const [patients, setPatients] = useState<PatientRecord[]>(() => getPatients());
   const [selectedPatientId, setSelectedPatientId] = useState<string>(() => getPatients()[0]?.id ?? "");
   const [showCreateModal, setShowCreateModal] = useState(false);

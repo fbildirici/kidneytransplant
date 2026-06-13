@@ -8,7 +8,7 @@ import {
   Bot, Activity, CheckCircle, TrendingUp, AlertCircle,
 } from "lucide-react";
 import PageTitle from "@/components/PageTitle";
-import { authSignIn, setSession } from "@/lib/simple-auth";
+import { authSignIn, setSession, DEMO_CREDENTIALS } from "@/lib/simple-auth";
 import type { UserRole } from "@/lib/auth-context";
 
 const redirectMap: Record<UserRole, string> = {
@@ -122,8 +122,28 @@ export default function LoginPage() {
               </Button>
             </form>
 
+            {/* Demo Credentials */}
+            <div className="mt-8 pt-6 border-t border-border">
+              <p className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-3 text-center">
+                Demo Hesapları (Tüm şifreler: <span className="font-bold text-text-secondary">Demo1234</span>)
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {(Object.values(DEMO_CREDENTIALS)).map((cred) => (
+                  <button
+                    key={cred.email}
+                    type="button"
+                    onClick={() => { setEmail(cred.email); setPassword("Demo1234"); setError(""); }}
+                    className="flex flex-col items-start p-2.5 rounded-[var(--radius-lg)] border border-border bg-surface-muted hover:border-navy-300 hover:bg-navy-50 transition-all text-left cursor-pointer"
+                  >
+                    <span className="text-xs font-semibold text-text-primary leading-tight">{cred.role}</span>
+                    <span className="text-[10px] text-text-tertiary leading-tight mt-0.5 truncate w-full">{cred.email}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Trust badges */}
-            <div className="flex items-center justify-center gap-5 mt-8 pt-6 border-t border-border">
+            <div className="flex items-center justify-center gap-5 mt-4 pt-4 border-t border-border">
               {[
                 { icon: Shield,       label: "Veri Güvenliği Öncelikli" },
                 { icon: CheckCircle,  label: "Şifreli Bağlantı" },

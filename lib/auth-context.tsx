@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { getSession, clearSession, type StoredUser } from "./simple-auth";
+import { getSession, clearSession, seedDemoUsers, type StoredUser } from "./simple-auth";
 
 export type UserRole = "patient" | "doctor" | "dietitian" | "coordinator";
 
@@ -54,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    seedDemoUsers();
     const session = getSession();
     setUser(session);
     setLoading(false);
