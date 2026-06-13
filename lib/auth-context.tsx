@@ -1,13 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import {
-  type User,
-  onAuthStateChanged,
-  signOut as firebaseSignOut,
-} from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "./firebase";
+import { getSession, clearSession, type StoredUser } from "./simple-auth";
 
 export type UserRole = "patient" | "doctor" | "dietitian" | "coordinator";
 
@@ -25,11 +19,11 @@ export interface UserProfile {
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: StoredUser | null;
   profile: UserProfile | null;
   role: UserRole | null;
   loading: boolean;
-  signOut: () => Promise<void>;
+  signOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -37,42 +31,41 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   role: null,
   loading: true,
-  signOut: async () => {},
+  signOut: () => {},
 });
 
+function toProfile(u: StoredUser): UserProfile {
+  return {
+    uid:           u.uid,
+    email:         u.email,
+    displayName:   u.displayName,
+    firstName:     u.firstName,
+    lastName:      u.lastName,
+    role:          u.role,
+    transplantDate: u.transplantDate,
+    bloodGroup:    u.bloodGroup,
+    doctorName:    u.doctorName,
+    specialty:     u.specialty,
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [user, setUser]       = useState<StoredUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-      if (firebaseUser) {
-        try {
-          const snap = await getDoc(doc(db, "users", firebaseUser.uid));
-          if (snap.exists()) {
-            setProfile({ uid: firebaseUser.uid, ...(snap.data() as Omit<UserProfile, "uid">) });
-          }
-          // Set session cookie for middleware
-          document.cookie = `renacare-auth=${firebaseUser.uid}; path=/; SameSite=Lax; max-age=86400`;
-        } catch (err) {
-          console.error("Kullanıcı profili alınamadı:", err);
-        }
-      } else {
-        setProfile(null);
-        document.cookie = "renacare-auth=; path=/; max-age=0";
-      }
-      setLoading(false);
-    });
-    return unsubscribe;
+    const session = getSession();
+    setUser(session);
+    setLoading(false);
   }, []);
 
-  const signOut = async () => {
-    await firebaseSignOut(auth);
-    document.cookie = "renacare-auth=; path=/; max-age=0";
+  const signOut = () => {
+    clearSession();
+    setUser(null);
     window.location.href = "/login";
   };
+
+  const profile = user ? toProfile(user) : null;
 
   return (
     <AuthContext.Provider value={{ user, profile, role: profile?.role ?? null, loading, signOut }}>
@@ -88,15 +81,15 @@ export function useAuth() {
 export function getInitials(name: string): string {
   return name
     .split(" ")
-    .map((part) => part[0] ?? "")
+    .map((p) => p[0] ?? "")
     .join("")
     .toUpperCase()
     .slice(0, 2);
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {
-  patient: "Hasta",
-  doctor: "Doktor",
-  dietitian: "Diyetisyen",
+  patient:     "Hasta",
+  doctor:      "Doktor",
+  dietitian:   "Diyetisyen",
   coordinator: "Koordinatör",
 };

@@ -9,16 +9,14 @@ import {
   Stethoscope, Apple, CalendarCheck2,
 } from "lucide-react";
 import PageTitle from "@/components/PageTitle";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { authCreateUser, setSession } from "@/lib/simple-auth";
 import type { UserRole } from "@/lib/auth-context";
 
 const ROLE_OPTIONS: { id: UserRole; label: string; desc: string; icon: React.ElementType }[] = [
-  { id: "patient",     label: "Hasta",        desc: "Böbrek nakil hastası",    icon: User },
-  { id: "doctor",      label: "Doktor",        desc: "Nefrolog / Nakil hekimi", icon: Stethoscope },
-  { id: "dietitian",   label: "Diyetisyen",    desc: "Beslenme uzmanı",         icon: Apple },
-  { id: "coordinator", label: "Koordinatör",   desc: "Onay ve akış yönetimi",   icon: CalendarCheck2 },
+  { id: "patient",     label: "Hasta",       desc: "Böbrek nakil hastası",    icon: User },
+  { id: "doctor",      label: "Doktor",       desc: "Nefrolog / Nakil hekimi", icon: Stethoscope },
+  { id: "dietitian",   label: "Diyetisyen",   desc: "Beslenme uzmanı",         icon: Apple },
+  { id: "coordinator", label: "Koordinatör",  desc: "Onay ve akış yönetimi",   icon: CalendarCheck2 },
 ];
 
 const redirectMap: Record<UserRole, string> = {
@@ -29,9 +27,9 @@ const redirectMap: Record<UserRole, string> = {
 };
 
 export default function RegisterPage() {
-  const [step, setStep]           = useState(1);
-  const [error, setError]         = useState("");
-  const [loading, setLoading]     = useState(false);
+  const [step, setStep]                 = useState(1);
+  const [error, setError]               = useState("");
+  const [loading, setLoading]           = useState(false);
   const [kvkkAccepted, setKvkkAccepted] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>("patient");
   const [form, setForm] = useState({
@@ -55,8 +53,8 @@ export default function RegisterPage() {
       setError("Lütfen geçerli bir e-posta adresi girin.");
       return;
     }
-    if (form.password.length < 8) {
-      setError("Şifre en az 8 karakter olmalıdır.");
+    if (form.password.length < 6) {
+      setError("Şifre en az 6 karakter olmalıdır.");
       return;
     }
     if (form.password !== form.confirmPassword) {
@@ -70,7 +68,7 @@ export default function RegisterPage() {
     setStep(2);
   };
 
-  const handleStep2 = async (e: React.FormEvent) => {
+  const handleStep2 = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -83,43 +81,29 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const credential = await createUserWithEmailAndPassword(auth, form.email.trim(), form.password);
-      const uid = credential.user.uid;
-      const displayName = `${form.firstName} ${form.lastName}`;
-
-      const userData: Record<string, unknown> = {
-        uid,
-        email: form.email.trim(),
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
+      const displayName = `${form.firstName.trim()} ${form.lastName.trim()}`;
+      const user = authCreateUser({
+        email:        form.email.trim(),
+        password:     form.password,
+        firstName:    form.firstName.trim(),
+        lastName:     form.lastName.trim(),
         displayName,
-        role: selectedRole,
-        createdAt: serverTimestamp(),
-      };
-
-      if (selectedRole === "patient") {
-        userData.transplantDate = form.transplantDate;
-        userData.bloodGroup     = form.bloodGroup;
-        userData.doctorName     = form.doctorName.trim();
-        userData.doctorEmail    = form.doctorEmail.trim();
-      } else if (selectedRole === "doctor" || selectedRole === "dietitian") {
-        userData.specialty = form.specialty.trim();
-      }
-
-      await setDoc(doc(db, "users", uid), userData);
-
-      document.cookie = `renacare-auth=${uid}; path=/; SameSite=Lax; max-age=86400`;
+        role:         selectedRole,
+        transplantDate: form.transplantDate || undefined,
+        bloodGroup:   form.bloodGroup || undefined,
+        doctorName:   form.doctorName.trim() || undefined,
+        doctorEmail:  form.doctorEmail.trim() || undefined,
+        specialty:    form.specialty.trim() || undefined,
+      });
+      setSession(user);
       window.location.href = redirectMap[selectedRole];
     } catch (err: unknown) {
-      const code = (err as { code?: string }).code ?? "";
-      if (code === "auth/email-already-in-use") {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg === "auth/email-already-in-use") {
         setError("Bu e-posta adresi zaten kayıtlı. Giriş sayfasını deneyin.");
-      } else if (code === "auth/weak-password") {
-        setError("Şifre çok zayıf. En az 8 karakter kullanın.");
       } else {
         setError("Kayıt oluşturulamadı. Lütfen tekrar deneyin.");
       }
-    } finally {
       setLoading(false);
     }
   };
@@ -128,7 +112,7 @@ export default function RegisterPage() {
     <>
       <PageTitle title="Kayıt Ol" />
       <div className="min-h-screen flex">
-        {/* Left — Decoration */}
+        {/* Sol — Dekorasyon */}
         <div className="hidden lg:flex flex-1 bg-navy-700 items-center justify-center p-12 relative">
           <div className="relative text-center text-white max-w-md">
             <div className="w-16 h-16 mx-auto mb-6 rounded-[var(--radius-xl)] bg-surface/10 flex items-center justify-center">
@@ -140,10 +124,10 @@ export default function RegisterPage() {
             </p>
             <div className="space-y-3 text-left">
               {[
-                { icon: Shield,       text: "Tıbbi veriler şifrelenmiş iletimle korunur" },
-                { icon: CheckCircle,  text: "Doktor onayı olmadan ilaç değişikliği yapılmaz" },
-                { icon: Activity,     text: "Lab sonuçları anlık trend analizi ile izlenir" },
-                { icon: Bot,          text: "Yapay zeka tanı koymaz, yalnızca genel bilgi sunar" },
+                { icon: Shield,      text: "Tıbbi veriler şifrelenmiş iletimle korunur" },
+                { icon: CheckCircle, text: "Doktor onayı olmadan ilaç değişikliği yapılmaz" },
+                { icon: Activity,    text: "Lab sonuçları anlık trend analizi ile izlenir" },
+                { icon: Bot,         text: "Yapay zeka tanı koymaz, yalnızca genel bilgi sunar" },
               ].map((point, i) => (
                 <div key={i} className="flex items-center gap-3 bg-surface/8 rounded-[var(--radius-lg)] p-3">
                   <div className="w-8 h-8 rounded-[var(--radius-md)] bg-surface/15 flex items-center justify-center flex-shrink-0">
@@ -156,7 +140,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Right — Form */}
+        {/* Sağ — Form */}
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="w-full max-w-md">
             <div className="flex items-center gap-2.5 mb-8">
@@ -169,15 +153,19 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Step indicator */}
-            <div className="flex items-center gap-3 mb-8">
-              {[1, 2].map((s) => (
+            {/* Adım göstergesi */}
+            <div className="flex items-center gap-2 mb-8">
+              {[1, 2].map((s, idx) => (
                 <div key={s} className="flex items-center gap-2">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step >= s ? "bg-navy-600 text-white" : "bg-surface-muted text-text-tertiary"}`}>
                     {s}
                   </div>
                   <span className="text-sm text-text-secondary">{s === 1 ? "Hesap" : "Sağlık"}</span>
-                  {s === 1 && <div className="flex-1 h-0.5 w-16 bg-border rounded"><div className={`h-full bg-navy-600 rounded transition-all ${step >= 2 ? "w-full" : "w-0"}`} /></div>}
+                  {idx === 0 && (
+                    <div className="w-12 h-0.5 bg-border rounded mx-1">
+                      <div className={`h-full bg-navy-600 rounded transition-all ${step >= 2 ? "w-full" : "w-0"}`} />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -187,7 +175,7 @@ export default function RegisterPage() {
                 <h1 className="text-2xl font-semibold text-text-primary mb-2">Hesap Oluşturun</h1>
                 <p className="text-text-secondary mb-6 text-sm">Sağlık takibinize başlamak için bilgilerinizi girin.</p>
 
-                {/* Role selection */}
+                {/* Rol seçimi */}
                 <div className="mb-6">
                   <p className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-3">Rolünüz</p>
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -221,12 +209,12 @@ export default function RegisterPage() {
                     <Input label="Soyad" placeholder="Yılmaz" value={form.lastName} onChange={(e) => update("lastName", e.target.value)} />
                   </div>
                   <Input label="E-posta" type="email" placeholder="ornek@email.com" icon={<Mail size={18} />} value={form.email} onChange={(e) => update("email", e.target.value)} />
-                  <Input label="Şifre" type="password" placeholder="En az 8 karakter" icon={<Lock size={18} />} value={form.password} onChange={(e) => update("password", e.target.value)} />
+                  <Input label="Şifre" type="password" placeholder="En az 6 karakter" icon={<Lock size={18} />} value={form.password} onChange={(e) => update("password", e.target.value)} />
                   <Input label="Şifre Tekrar" type="password" placeholder="Şifrenizi tekrar girin" icon={<Lock size={18} />} value={form.confirmPassword} onChange={(e) => update("confirmPassword", e.target.value)} />
                   <label className="flex items-start gap-2.5 text-sm text-text-secondary cursor-pointer select-none">
                     <input type="checkbox" checked={kvkkAccepted} onChange={(e) => { setKvkkAccepted(e.target.checked); setError(""); }} className="w-4 h-4 mt-0.5 rounded border-border text-navy-600 focus:ring-navy-500" />
                     <span className="text-xs leading-relaxed">
-                      <Link href="/privacy" className="text-navy-600 hover:text-navy-700 font-semibold underline">KVKK Aydınlatma Metni</Link>'ni okudum ve kişisel verilerimin işlenmesini kabul ediyorum.
+                      <Link href="/privacy" className="text-navy-600 hover:text-navy-700 font-semibold underline">KVKK Aydınlatma Metni</Link>'ni okudum ve kabul ediyorum.
                     </span>
                   </label>
                   <Button type="submit" className="w-full" size="lg">
@@ -239,14 +227,12 @@ export default function RegisterPage() {
                 <h1 className="text-2xl font-semibold text-text-primary mb-2">
                   {selectedRole === "patient" ? "Sağlık Bilgileriniz" : "Mesleki Bilgileriniz"}
                 </h1>
-                <p className="text-text-secondary mb-5 text-sm">
-                  Size uygun takip deneyimi oluşturmak için kullanılır.
-                </p>
+                <p className="text-text-secondary mb-5 text-sm">Size uygun takip deneyimi oluşturmak için kullanılır.</p>
 
                 <div className="flex items-start gap-2 bg-info-50 border border-info-200 rounded-[var(--radius-xl)] px-4 py-3 mb-5">
                   <Info size={14} className="text-info-600 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-info-700 leading-relaxed">
-                    Bu bilgiler yalnızca sizinle ve sağlık ekibinizle paylaşılır. Üçüncü taraflara satılmaz.
+                    Bu bilgiler yalnızca sizinle ve sağlık ekibinizle paylaşılır.
                   </p>
                 </div>
 

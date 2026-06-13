@@ -8,15 +8,13 @@ import {
   Bot, Activity, CheckCircle, TrendingUp, AlertCircle,
 } from "lucide-react";
 import PageTitle from "@/components/PageTitle";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { authSignIn, setSession } from "@/lib/simple-auth";
 import type { UserRole } from "@/lib/auth-context";
 
 const redirectMap: Record<UserRole, string> = {
-  patient: "/dashboard",
-  doctor: "/doctor",
-  dietitian: "/dietitian",
+  patient:     "/dashboard",
+  doctor:      "/doctor",
+  dietitian:   "/dietitian",
   coordinator: "/coordinator",
 };
 
@@ -28,10 +26,10 @@ const trustPoints = [
 ];
 
 const features = [
-  { icon: Pill,         label: "İlaç Takibi",       desc: "Düzenli doz kontrolü" },
-  { icon: Shield,       label: "Güvenli Veri",       desc: "Verileriniz korunur" },
-  { icon: Bot,          label: "Sağlık Asistanı",    desc: "Genel bilgi desteği" },
-  { icon: Activity,     label: "Lab Takibi",         desc: "Trend analizi" },
+  { icon: Pill,     label: "İlaç Takibi",    desc: "Düzenli doz kontrolü" },
+  { icon: Shield,   label: "Güvenli Veri",   desc: "Verileriniz korunur" },
+  { icon: Bot,      label: "Sağlık Asistanı", desc: "Genel bilgi desteği" },
+  { icon: Activity, label: "Lab Takibi",     desc: "Trend analizi" },
 ];
 
 export default function LoginPage() {
@@ -40,7 +38,7 @@ export default function LoginPage() {
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -51,32 +49,16 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
-      const uid = credential.user.uid;
-
-      // Fetch role from Firestore
-      const snap = await getDoc(doc(db, "users", uid));
-      const role: UserRole = snap.exists()
-        ? ((snap.data() as { role: UserRole }).role ?? "patient")
-        : "patient";
-
-      // Session cookie is set by AuthProvider via onAuthStateChanged,
-      // but we set it here too to ensure it exists before redirect
-      document.cookie = `renacare-auth=${uid}; path=/; SameSite=Lax; max-age=86400`;
-
-      window.location.href = redirectMap[role];
+      const user = authSignIn(email.trim(), password);
+      setSession(user);
+      window.location.href = redirectMap[user.role];
     } catch (err: unknown) {
-      const code = (err as { code?: string }).code ?? "";
-      if (code === "auth/user-not-found" || code === "auth/wrong-password" || code === "auth/invalid-credential") {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg === "auth/invalid-credential") {
         setError("E-posta veya şifre hatalı.");
-      } else if (code === "auth/too-many-requests") {
-        setError("Çok fazla başarısız deneme. Lütfen bir süre bekleyin.");
-      } else if (code === "auth/invalid-email") {
-        setError("Geçersiz e-posta adresi.");
       } else {
         setError("Giriş yapılamadı. Lütfen tekrar deneyin.");
       }
-    } finally {
       setLoading(false);
     }
   };
@@ -85,7 +67,7 @@ export default function LoginPage() {
     <>
       <PageTitle title="Giriş Yap" />
       <div className="min-h-screen flex bg-bg">
-        {/* Left — Form */}
+        {/* Sol — Form */}
         <div className="flex-1 flex items-center justify-center p-8 relative">
           <div className="w-full max-w-md relative">
             {/* Logo */}
@@ -129,27 +111,16 @@ export default function LoginPage() {
                 onChange={(e) => { setPassword(e.target.value); setError(""); }}
                 icon={<Lock size={18} />}
               />
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2.5 text-sm text-text-secondary cursor-pointer select-none">
-                  <input type="checkbox" className="w-4 h-4 rounded border-border text-navy-500 focus:ring-navy-500" />
-                  Beni hatırla
-                </label>
-                <a href="#" className="text-sm text-navy-600 hover:text-navy-700 font-semibold transition-colors">
-                  Şifremi unuttum?
-                </a>
+              <div className="flex items-center justify-end">
+                <Link href="/register" className="text-sm text-navy-600 hover:text-navy-700 font-semibold transition-colors">
+                  Hesabınız yok mu? Kayıt Ol
+                </Link>
               </div>
               <Button type="submit" className="w-full mt-2" size="lg" disabled={loading}>
                 {loading ? "Giriş yapılıyor…" : "Giriş Yap"}
                 {!loading && <ArrowRight size={18} />}
               </Button>
             </form>
-
-            <p className="text-center text-sm text-text-secondary mt-6">
-              Hesabınız yok mu?{" "}
-              <Link href="/register" className="text-navy-600 hover:text-navy-700 font-semibold transition-colors">
-                Ücretsiz Kayıt Ol
-              </Link>
-            </p>
 
             {/* Trust badges */}
             <div className="flex items-center justify-center gap-5 mt-8 pt-6 border-t border-border">
@@ -167,7 +138,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right — Hero Panel */}
+        {/* Sağ — Hero */}
         <div className="hidden lg:flex flex-1 relative items-center justify-center p-12 bg-navy-700">
           <div className="relative z-10 text-center text-white max-w-md">
             <div className="w-16 h-16 mx-auto mb-6 rounded-[var(--radius-xl)] bg-surface/10 flex items-center justify-center">
