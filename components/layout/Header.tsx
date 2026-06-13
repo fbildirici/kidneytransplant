@@ -1,9 +1,28 @@
 "use client";
-import { Bell, Menu, Pill, MessageSquare, Calendar, Activity, CheckCircle, X, TrendingUp } from "lucide-react";
+import {
+  Bell, Menu, Pill, MessageSquare, Calendar, Activity,
+  CheckCircle, X, TrendingUp, Stethoscope, Apple, Users, ClipboardList,
+} from "lucide-react";
 import Avatar from "@/components/ui/Avatar";
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import MobileNav from "./MobileNav";
 import type { ElementType } from "react";
+
+type AppRole = "patient" | "doctor" | "dietitian" | "coordinator";
+
+interface UserProfile {
+  name: string;
+  shortName: string;
+  role: string;
+}
+
+const ROLE_PROFILES: Record<AppRole, UserProfile> = {
+  patient:     { name: "Ahmet Yılmaz",      shortName: "Ahmet Y.",    role: "Hasta" },
+  doctor:      { name: "Dr. Ayşe Kaya",     shortName: "Dr. Kaya",    role: "Nefrolog" },
+  dietitian:   { name: "Dyt. Zeynep Arslan", shortName: "Dyt. Arslan", role: "Diyetisyen" },
+  coordinator: { name: "Selin Demir",        shortName: "S. Demir",    role: "Koordinatör" },
+};
 
 interface Notification {
   id: string;
@@ -16,75 +35,140 @@ interface Notification {
   read: boolean;
 }
 
-const INITIAL_NOTIFICATIONS: Notification[] = [
-  {
-    id: "1",
-    icon: Pill,
-    iconBg: "bg-navy-50",
-    iconColor: "text-navy-600",
-    title: "İlaç Hatırlatması",
-    desc: "Tacrolimus 2mg — Saat 20:00 dozunu almayı unutmayın.",
-    time: "5 dk önce",
-    read: false,
-  },
-  {
-    id: "2",
-    icon: MessageSquare,
-    iconBg: "bg-success-50",
-    iconColor: "text-success-600",
-    title: "Doktor Yanıtladı",
-    desc: "Dr. Ayşe Kaya tacrolimus seviyeniz hakkındaki mesajınızı yanıtladı.",
-    time: "1 saat önce",
-    read: false,
-  },
-  {
-    id: "3",
-    icon: Calendar,
-    iconBg: "bg-medical-50",
-    iconColor: "text-medical-600",
-    title: "Yaklaşan Randevu",
-    desc: "Dr. Ayşe Kaya ile yarın 10:00'da randevunuz var.",
-    time: "2 saat önce",
-    read: false,
-  },
-  {
-    id: "4",
-    icon: TrendingUp,
-    iconBg: "bg-info-50",
-    iconColor: "text-info-600",
-    title: "Lab Sonuçları Güncellendi",
-    desc: "Kreatinin değeriniz güncellendi: 1.2 mg/dL — Normal aralıkta.",
-    time: "Dün",
-    read: true,
-  },
-  {
-    id: "5",
-    icon: Activity,
-    iconBg: "bg-warning-50",
-    iconColor: "text-warning-600",
-    title: "Haftalık İlaç Uyum Raporu",
-    desc: "Bu hafta %94 ilaç uyumu sağladınız.",
-    time: "2 gün önce",
-    read: true,
-  },
-];
+const ROLE_NOTIFICATIONS: Record<AppRole, Notification[]> = {
+  patient: [
+    {
+      id: "p1", icon: Pill, iconBg: "bg-navy-50", iconColor: "text-navy-600",
+      title: "İlaç Hatırlatması",
+      desc: "Tacrolimus 2mg — Saat 20:00 dozunu almayı unutmayın.",
+      time: "5 dk önce", read: false,
+    },
+    {
+      id: "p2", icon: MessageSquare, iconBg: "bg-success-50", iconColor: "text-success-600",
+      title: "Doktor Yanıtladı",
+      desc: "Dr. Ayşe Kaya tacrolimus seviyeniz hakkındaki mesajınızı yanıtladı.",
+      time: "1 saat önce", read: false,
+    },
+    {
+      id: "p3", icon: Calendar, iconBg: "bg-medical-50", iconColor: "text-medical-600",
+      title: "Yaklaşan Randevu",
+      desc: "Dr. Ayşe Kaya ile yarın 10:00'da randevunuz var.",
+      time: "2 saat önce", read: false,
+    },
+    {
+      id: "p4", icon: TrendingUp, iconBg: "bg-info-50", iconColor: "text-info-600",
+      title: "Lab Sonuçları Güncellendi",
+      desc: "Kreatinin değeriniz güncellendi: 1.2 mg/dL — Normal aralıkta.",
+      time: "Dün", read: true,
+    },
+  ],
+  doctor: [
+    {
+      id: "d1", icon: Activity, iconBg: "bg-danger-50", iconColor: "text-danger-600",
+      title: "Kritik Lab Değeri",
+      desc: "Mehmet Çelik — Kreatinin 2.4 mg/dL, Tacrolimus 4.1 ng/mL (kritik).",
+      time: "10 dk önce", read: false,
+    },
+    {
+      id: "d2", icon: MessageSquare, iconBg: "bg-navy-50", iconColor: "text-navy-600",
+      title: "Yeni Hasta Mesajı",
+      desc: "Fatma Demir: 'Tacrolimus dozum hakkında sorularım var...'",
+      time: "30 dk önce", read: false,
+    },
+    {
+      id: "d3", icon: Calendar, iconBg: "bg-warning-50", iconColor: "text-warning-600",
+      title: "Randevu Talebi",
+      desc: "Zeynep Arslan — Koordinatör onayı bekleyen randevu talebi.",
+      time: "1 saat önce", read: false,
+    },
+    {
+      id: "d4", icon: TrendingUp, iconBg: "bg-success-50", iconColor: "text-success-600",
+      title: "Lab Raporu İçe Aktarıldı",
+      desc: "Ahmet Yılmaz için 8 lab değeri başarıyla sisteme eklendi.",
+      time: "3 saat önce", read: true,
+    },
+  ],
+  dietitian: [
+    {
+      id: "dt1", icon: Apple, iconBg: "bg-success-50", iconColor: "text-success-600",
+      title: "Beslenme Kaydı Güncellendi",
+      desc: "Ahmet Yılmaz günlük su hedefini (%87) tamamladı.",
+      time: "15 dk önce", read: false,
+    },
+    {
+      id: "dt2", icon: MessageSquare, iconBg: "bg-navy-50", iconColor: "text-navy-600",
+      title: "Hasta Mesajı",
+      desc: "Fatma Demir: 'Potasyum kısıtlaması hakkında bilgi alabilir miyim?'",
+      time: "2 saat önce", read: false,
+    },
+    {
+      id: "dt3", icon: Activity, iconBg: "bg-warning-50", iconColor: "text-warning-600",
+      title: "Yüksek Potasyum Uyarısı",
+      desc: "Fatma Demir'in son kan sonucunda potasyum 5.3 mmol/L.",
+      time: "Dün", read: true,
+    },
+  ],
+  coordinator: [
+    {
+      id: "c1", icon: Calendar, iconBg: "bg-warning-50", iconColor: "text-warning-600",
+      title: "Onay Bekleyen Randevu",
+      desc: "Fatma Demir → Dr. Ayşe Kaya randevu talebi onay bekliyor.",
+      time: "20 dk önce", read: false,
+    },
+    {
+      id: "c2", icon: Calendar, iconBg: "bg-warning-50", iconColor: "text-warning-600",
+      title: "Onay Bekleyen Randevu",
+      desc: "Ahmet Yılmaz → Dyt. Zeynep Arslan randevu talebi onay bekliyor.",
+      time: "45 dk önce", read: false,
+    },
+    {
+      id: "c3", icon: Users, iconBg: "bg-navy-50", iconColor: "text-navy-600",
+      title: "Yeni Hasta Kaydı",
+      desc: "Zeynep Arslan sisteme eklendi, doktor ve diyetisyen ataması gerekiyor.",
+      time: "3 saat önce", read: true,
+    },
+    {
+      id: "c4", icon: ClipboardList, iconBg: "bg-success-50", iconColor: "text-success-600",
+      title: "Randevu Onaylandı",
+      desc: "Zeynep Arslan'ın Dr. Ayşe Kaya randevusu onaylandı.",
+      time: "Dün", read: true,
+    },
+  ],
+};
+
+function detectRole(pathname: string): AppRole {
+  if (pathname.startsWith("/doctor")) return "doctor";
+  if (pathname.startsWith("/dietitian")) return "dietitian";
+  if (pathname.startsWith("/coordinator")) return "coordinator";
+  return "patient";
+}
 
 export default function Header() {
+  const pathname = usePathname();
+  const role = detectRole(pathname);
+  const profile = ROLE_PROFILES[role];
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>(
+    () => ROLE_NOTIFICATIONS[role]
+  );
   const panelRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLButtonElement>(null);
+
+  // Reset notifications when role changes (pathname change)
+  useEffect(() => {
+    setNotifications(ROLE_NOTIFICATIONS[role]);
+    setNotifOpen(false);
+  }, [role]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (
-        panelRef.current &&
-        !panelRef.current.contains(e.target as Node) &&
-        bellRef.current &&
-        !bellRef.current.contains(e.target as Node)
+        panelRef.current && !panelRef.current.contains(e.target as Node) &&
+        bellRef.current && !bellRef.current.contains(e.target as Node)
       ) {
         setNotifOpen(false);
       }
@@ -96,31 +180,25 @@ export default function Header() {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") setNotifOpen(false);
-
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const markAllRead = () => {
+  const markAllRead = () =>
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
 
-  const markRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
+  const markRead = (id: string) =>
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
 
-  const dismiss = (id: string) => {
+  const dismiss = (id: string) =>
     setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
 
   return (
     <>
       <header className="sticky top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-border">
         <div className="flex items-center justify-between px-4 lg:px-6 py-3 gap-4">
-          {/* Mobile menu button */}
+          {/* Mobile menu button (left, mobile only) */}
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="lg:hidden p-2 rounded-[var(--radius-md)] text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-colors cursor-pointer flex-shrink-0"
@@ -129,7 +207,10 @@ export default function Header() {
             <Menu size={20} />
           </button>
 
-          {/* Right section */}
+          {/* Spacer on desktop so right section stays right */}
+          <div className="hidden lg:block flex-1" />
+
+          {/* Right section — notifications + role profile */}
           <div className="flex items-center gap-2">
             {/* Notification bell */}
             <div className="relative">
@@ -192,9 +273,7 @@ export default function Header() {
                           key={notif.id}
                           onClick={() => markRead(notif.id)}
                           className={`flex items-start gap-3 px-5 py-3.5 transition-colors cursor-pointer group ${
-                            notif.read
-                              ? "hover:bg-surface-muted"
-                              : "bg-navy-50/30 hover:bg-navy-50/50"
+                            notif.read ? "hover:bg-surface-muted" : "bg-navy-50/30 hover:bg-navy-50/50"
                           }`}
                         >
                           <div className={`w-8 h-8 rounded-[var(--radius-md)] ${notif.iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
@@ -237,14 +316,14 @@ export default function Header() {
               )}
             </div>
 
-            {/* User info */}
+            {/* Role-aware user profile */}
             <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-border">
               <div className="text-right">
-                <p className="text-sm font-medium text-text-primary leading-tight">Ahmet Y.</p>
-                <p className="text-[11px] text-text-tertiary leading-tight">Hasta</p>
+                <p className="text-sm font-medium text-text-primary leading-tight">{profile.shortName}</p>
+                <p className="text-[11px] text-text-tertiary leading-tight">{profile.role}</p>
               </div>
               <div className="relative">
-                <Avatar name="Ahmet Yılmaz" size="md" />
+                <Avatar name={profile.name} size="md" />
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success-500 rounded-full border-2 border-surface" />
               </div>
             </div>

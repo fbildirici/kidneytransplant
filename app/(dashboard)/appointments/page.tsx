@@ -8,6 +8,7 @@ import {
   getSlots,
   ProviderRole,
 } from "@/lib/store";
+import { useToast } from "@/lib/toast-context";
 import { Calendar, CalendarDays, CalendarX2, CheckCircle, Clock, UserRound, Users, XCircle, AlertCircle } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import DemoBadge from "@/components/ui/DemoBadge";
@@ -29,6 +30,7 @@ function formatDate(dateStr: string): string {
 export default function PatientAppointmentsPage() {
   const [providerRole, setProviderRole] = useState<ProviderRole>("doctor");
   const [refreshKey, setRefreshKey] = useState(0);
+  const toast = useToast();
 
   const upcoming = useMemo(() => getPatientAppointments(PATIENT_ID), [refreshKey]);
   const availableSlots = useMemo(
@@ -49,8 +51,15 @@ export default function PatientAppointmentsPage() {
   }, [availableSlots]);
 
   const requestAppointment = (slotId: string) => {
+    const slot = getSlots().find((s) => s.id === slotId);
     bookAppointment(slotId, PATIENT_ID, PATIENT_NAME);
     setRefreshKey((value) => value + 1);
+    if (slot) {
+      toast.addToast(
+        `${slot.providerName} için ${slot.date} ${slot.time} randevu talebiniz oluşturuldu. Koordinatör onayı bekleniyor.`,
+        "success"
+      );
+    }
   };
 
   return (

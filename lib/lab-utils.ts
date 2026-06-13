@@ -1,20 +1,20 @@
 import type { LabDataPoint, LabImportSource, LabMetricKey } from "@/lib/store";
 
 const METRIC_ALIASES: Record<LabMetricKey, string[]> = {
-  creatinine: ["kreatinin", "creatinine", "serum kreatinin"],
-  urea: ["ure", "üre", "urea", "blood urea"],
-  uricAcid: ["urik asit", "ürik asit", "uric acid"],
-  gfr: ["gfr", "egfr", "e-gfr", "glomeruler filtrasyon", "glomerüler filtrasyon"],
-  urineProtein: ["idrarda protein", "proteinuri", "proteinüri", "urine protein"],
+  creatinine: ["kreatinin", "creatinine", "serum kreatinin", "krea", "serum kr.", "s.kreatinin"],
+  urea: ["üre", "ure", "urea", "blood urea", "bun", "kan üre", "serum üre", "kan üre azotu"],
+  uricAcid: ["ürik asit", "urik asit", "uric acid"],
+  gfr: ["gfr", "egfr", "e-gfr", "glomeruler filtrasyon", "glomerüler filtrasyon", "ckd-epi gfr", "mdrd gfr", "tahmini gfr"],
+  urineProtein: ["idrarda protein", "proteinuri", "proteinüri", "urine protein", "idrar protein"],
   urineCreatinine: ["idrarda kreatinin", "urine creatinine", "idrar kreatinin"],
   spotUrine: ["spot idrar", "protein/kreatinin", "protein kreatinin", "spot urine"],
   tacrolimus: ["tacrolimus", "takrolimus", "fk506"],
   hemoglobin: ["hemoglobin", "hgb", "hb"],
-  potassium: ["potasyum", "potassium", "k+"],
-  sodium: ["sodyum", "sodium", "na+"],
-  phosphorus: ["fosfor", "phosphorus", "phosphate"],
-  albumin: ["albumin", "albümin"],
-  crp: ["crp", "c-reaktif protein", "c reaktif protein"],
+  potassium: ["potasyum", "potassium", "k+", "serum potasyum"],
+  sodium: ["sodyum", "sodium", "na+", "serum sodyum"],
+  phosphorus: ["fosfor", "phosphorus", "phosphate", "serum fosfor", "fosfat"],
+  albumin: ["albumin", "albümin", "serum albümin"],
+  crp: ["crp", "c-reaktif protein", "c reaktif protein", "c-reactive protein", "hs-crp"],
 };
 
 const DATE_PATTERNS = [
@@ -23,7 +23,8 @@ const DATE_PATTERNS = [
 ];
 
 function parseNumber(raw: string): number | undefined {
-  const match = raw.replace(",", ".").match(/-?\d+(?:\.\d+)?/);
+  // Replace ALL commas with dots to handle Turkish decimal format (1,20 → 1.20)
+  const match = raw.replace(/,/g, ".").match(/-?\d+(?:\.\d+)?/);
   if (!match) return undefined;
   const value = Number(match[0]);
   return Number.isFinite(value) ? value : undefined;
@@ -61,7 +62,9 @@ export function extractLabValuesFromText(text: string): Partial<LabDataPoint> {
 
     for (const alias of aliases) {
       const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const lineRegex = new RegExp(`${escaped}[^\\d-]{0,15}(-?\\d+[,.]?\\d*)`, "i");
+      // Allow up to 30 non-digit/non-hyphen chars between alias and value
+      // to handle wide column-aligned e-Nabız output (tabs, multiple spaces)
+      const lineRegex = new RegExp(`${escaped}[^\\d-]{0,30}(-?\\d+[,.]?\\d*)`, "i");
       const lineMatch = lower.match(lineRegex);
       if (lineMatch?.[1]) {
         const value = parseNumber(lineMatch[1]);
