@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { CalendarCheck2, ChevronLeft, ChevronRight, HeartPulse, LayoutDashboard, LogOut } from "lucide-react";
+import { CalendarCheck2, CalendarPlus, ChevronLeft, ChevronRight, HeartPulse, LayoutDashboard, LogOut } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
-  { href: "/coordinator", label: "Onay Merkezi", icon: LayoutDashboard },
+  { href: "/coordinator",       label: "Onay Merkezi",  icon: LayoutDashboard },
+  { href: "/coordinator/slots", label: "Slot Yönetimi", icon: CalendarPlus },
 ];
 
 export default function CoordinatorSidebar() {
@@ -38,7 +39,10 @@ export default function CoordinatorSidebar() {
 
       <nav className={cn("flex-1 py-4 space-y-0.5 overflow-y-auto", collapsed ? "px-2" : "px-3")}>
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            item.href === "/coordinator"
+              ? pathname === "/coordinator"
+              : pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}

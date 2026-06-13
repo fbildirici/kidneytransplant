@@ -25,9 +25,8 @@ import {
   WandSparkles,
 } from "lucide-react";
 
-// Gerçekçi e-Nabız kopyala-yapıştır örneği
-// Türkçe ondalık virgül (1,20) ve geniş boşluk formatı
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
+
 const SAMPLE_ENABIZ_TEXT = `Biyokimya ve Hematoloji Sonuçları
 Tarih: ${TODAY_ISO}
 
@@ -42,6 +41,23 @@ Albümin                  4,10    g/dL
 CRP                      3,20    mg/L
 Hemoglobin               14,2    g/dL
 Tacrolimus               10,5    ng/mL`;
+
+const SAMPLE_CBC_TEXT = `Tam Kan Sayımı
+Tarih: ${TODAY_ISO}
+
+WBC (Lökosit)            7,50    K/µL
+RBC (Eritrosit)          4,80    M/µL
+Hemoglobin               14,2    g/dL
+Hematokrit               42,5    %
+MCV                      88,5    fL
+MCH                      29,6    pg
+MCHC                     33,4    g/dL
+PLT (Trombosit)          245     K/µL
+NEU (Nötrofil)           65,2    %
+LYM (Lenfosit)           25,3    %
+MON (Monosit)            7,10    %
+EOS (Eozinofil)          2,10    %
+BAS (Bazofil)            0,30    %`;
 
 const MANUAL_KEYS = [
   "creatinine",
@@ -103,6 +119,7 @@ export default function LabImportPanel({
       preview.map((point) => ({
         point,
         metrics: MANUAL_KEYS.filter((key) => typeof point[key] === "number"),
+        rawEntries: Object.entries(point.rawResults ?? {}),
       })),
     [preview]
   );
@@ -298,14 +315,12 @@ export default function LabImportPanel({
     );
     onImported?.(justImported);
 
-    // Count how many numeric metric fields were saved
     const metricCount = preview.reduce((sum, p) => {
-      return (
-        sum +
-        Object.keys(p).filter(
-          (k) => k !== "date" && typeof (p as Record<string, unknown>)[k] === "number"
-        ).length
-      );
+      const typed = Object.keys(p).filter(
+        (k) => k !== "date" && typeof (p as Record<string, unknown>)[k] === "number"
+      ).length;
+      const raw = Object.keys(p.rawResults ?? {}).length;
+      return sum + typed + raw;
     }, 0);
 
     toast.addToast(
@@ -386,18 +401,28 @@ export default function LabImportPanel({
           {/* Paste mode */}
           {mode === "paste" && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <label className="text-xs font-medium text-text-secondary">
                   e-Nabız veya laboratuvar raporunuzu yapıştırın
                 </label>
-                <button
-                  type="button"
-                  onClick={() => { setRawText(SAMPLE_ENABIZ_TEXT); setError(""); }}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-2.5 py-1.5 rounded-[var(--radius-md)] transition-colors cursor-pointer flex-shrink-0"
-                >
-                  <ClipboardPaste size={12} />
-                  Örnek Metin
-                </button>
+                <div className="flex gap-1.5 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => { setRawText(SAMPLE_ENABIZ_TEXT); setError(""); }}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-2.5 py-1.5 rounded-[var(--radius-md)] transition-colors cursor-pointer"
+                  >
+                    <ClipboardPaste size={12} />
+                    Biyokimya
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setRawText(SAMPLE_CBC_TEXT); setError(""); }}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-navy-700 bg-navy-50 hover:bg-navy-100 border border-navy-200 px-2.5 py-1.5 rounded-[var(--radius-md)] transition-colors cursor-pointer"
+                  >
+                    <ClipboardPaste size={12} />
+                    Tam Kan
+                  </button>
+                </div>
               </div>
               <textarea
                 rows={10}
@@ -534,7 +559,9 @@ export default function LabImportPanel({
                 </span>
               </div>
             ) : (
-              previewCards.map(({ point, metrics }, index) => (
+              previewCards.map(({ point, metrics, rawEntries }, index) => {
+                const totalCount = metrics.length + rawEntries.length;
+                return (
                 <div
                   key={`${point.date}-${index}`}
                   className="rounded-[var(--radius-xl)] border border-border bg-surface p-4"
@@ -545,35 +572,54 @@ export default function LabImportPanel({
                       <p className="text-xs text-text-muted">{point.sourceLabel}</p>
                     </div>
                     <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
-                      {metrics.length} metrik
+                      {totalCount} değer
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    {metrics.map((metricKey) => {
-                      const metric = LAB_METRIC_DEFINITIONS.find((m) => m.key === metricKey);
-                      if (!metric) return null;
-                      const val = point[metricKey] as number;
-                      const inRange = val >= metric.normalMin && val <= metric.normalMax;
-                      return (
-                        <div
-                          key={metricKey}
-                          className={`rounded-[var(--radius-lg)] px-3 py-2 ${
-                            inRange ? "bg-success-50" : "bg-warning-50"
-                          }`}
-                        >
-                          <p className="text-[11px] font-medium text-text-tertiary">
-                            {metric.label}
-                          </p>
-                          <p className={`text-sm font-bold ${inRange ? "text-success-700" : "text-warning-700"}`}>
-                            {renderValue(val)} {metric.unit}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  {metrics.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      {metrics.map((metricKey) => {
+                        const metric = LAB_METRIC_DEFINITIONS.find((m) => m.key === metricKey);
+                        if (!metric) return null;
+                        const val = point[metricKey] as number;
+                        const inRange = val >= metric.normalMin && val <= metric.normalMax;
+                        return (
+                          <div
+                            key={metricKey}
+                            className={`rounded-[var(--radius-lg)] px-3 py-2 ${
+                              inRange ? "bg-success-50" : "bg-warning-50"
+                            }`}
+                          >
+                            <p className="text-[11px] font-medium text-text-tertiary">
+                              {metric.label}
+                            </p>
+                            <p className={`text-sm font-bold ${inRange ? "text-success-700" : "text-warning-700"}`}>
+                              {renderValue(val)} {metric.unit}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {rawEntries.length > 0 && (
+                    <div className="rounded-[var(--radius-lg)] border border-border bg-surface-muted overflow-hidden">
+                      <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-text-muted border-b border-border">
+                        Tüm Çıkarılan Değerler ({rawEntries.length})
+                      </p>
+                      <div className="divide-y divide-border max-h-48 overflow-y-auto">
+                        {rawEntries.map(([label, value]) => (
+                          <div key={label} className="flex items-center justify-between px-3 py-1.5 gap-2">
+                            <span className="text-xs text-text-secondary truncate">{label}</span>
+                            <span className="text-xs font-semibold text-text-primary flex-shrink-0">{value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

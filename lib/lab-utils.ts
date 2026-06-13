@@ -163,6 +163,57 @@ export function parseDelimitedLabText(
   return parseRowsIntoLabData(rows, fallbackDate, sourceType);
 }
 
+// Extracts ANY "Label   Value [Unit]" pair from freeform text.
+// Used as a fallback so CBC / urinalysis / unknown panels never produce empty results.
+export function extractGeneralLabValues(text: string): Record<string, string> {
+  const seen = new Set<string>();
+  const results: Record<string, string> = {};
+
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.length < 3 || !/\d/.test(line)) continue;
+
+    let label = "";
+    let valueStr = "";
+    let unit = "";
+
+    // Priority 1: colon separator — "Hemoglobin: 14,2 g/dL"
+    const colonIdx = line.indexOf(":");
+    if (colonIdx > 0) {
+      const potLabel = line.slice(0, colonIdx).trim();
+      const rest = line.slice(colonIdx + 1).trimStart();
+      const nm = rest.match(/^(-?[\d,\.]+)\s*([A-Za-zÇçĞğİıÖöŞşÜüµ\/\%²³·]+)?/);
+      if (nm && potLabel.length >= 2 && !/^\d/.test(potLabel) && !potLabel.includes("http")) {
+        label = potLabel;
+        valueStr = nm[1];
+        unit = nm[2]?.trim() ?? "";
+      }
+    }
+
+    // Priority 2: 2+ consecutive spaces — "WBC (Lökosit)     7,50    K/µL    4,50-11,00    Normal"
+    if (!label) {
+      const spIdx = line.search(/\s{2,}/);
+      if (spIdx > 0) {
+        const potLabel = line.slice(0, spIdx).trim();
+        const rest = line.slice(spIdx).trimStart();
+        const nm = rest.match(/^(-?[\d,\.]+)\s*([A-Za-zÇçĞğİıÖöŞşÜüµ\/\%²³·]+)?/);
+        if (nm && potLabel.length >= 2 && !/^\d/.test(potLabel)) {
+          label = potLabel;
+          valueStr = nm[1];
+          unit = nm[2]?.trim() ?? "";
+        }
+      }
+    }
+
+    if (label && valueStr && !seen.has(label.toLocaleLowerCase("tr-TR"))) {
+      seen.add(label.toLocaleLowerCase("tr-TR"));
+      results[label] = unit ? `${valueStr} ${unit}` : valueStr;
+    }
+  }
+
+  return results;
+}
+
 export function buildSingleLabPoint(
   rawText: string,
   fallbackDate: string,
@@ -170,14 +221,18 @@ export function buildSingleLabPoint(
   meta?: Partial<LabDataPoint>
 ): LabDataPoint | null {
   const values = extractLabValuesFromText(rawText);
-  const hasValues = Object.keys(values).length > 0;
+  const rawResults = extractGeneralLabValues(rawText);
 
-  if (!hasValues) return null;
+  const hasTyped = Object.keys(values).length > 0;
+  const hasRaw = Object.keys(rawResults).length > 0;
+
+  if (!hasTyped && !hasRaw) return null;
 
   return {
     date: extractFirstDate(rawText) ?? fallbackDate,
     sourceType,
     rawText,
+    rawResults: hasRaw ? rawResults : undefined,
     ...values,
     ...meta,
   };

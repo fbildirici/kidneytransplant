@@ -246,6 +246,7 @@ export interface LabDataPoint {
   importedBy?: string;
   notes?: string;
   rawText?: string;
+  rawResults?: Record<string, string>;
 }
 
 export interface AppointmentSlot {
