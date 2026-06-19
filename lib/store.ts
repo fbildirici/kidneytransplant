@@ -1309,3 +1309,62 @@ export function markDoctorRead(messageIds: string[]): void {
     )
   );
 }
+
+// ========================================================
+// MEDICATION ADHERENCE LOG
+// ========================================================
+
+function medLogKey(patientId: string, date: string): string {
+  return `renacare_medlog_${patientId}_${date}`;
+}
+
+export function getMedicationLog(patientId: string, date: string): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(medLogKey(patientId, date)) ?? "{}") as Record<string, boolean>;
+  } catch {
+    return {};
+  }
+}
+
+export function saveMedicationLog(patientId: string, date: string, log: Record<string, boolean>): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(medLogKey(patientId, date), JSON.stringify(log));
+}
+
+const DAY_NAMES = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
+
+export function getWeeklyAdherence(patientId: string): { date: string; day: string; taken: number; total: number }[] {
+  const today = new Date();
+  const meds = getMedications(patientId);
+  const totalPerDay = meds.reduce((sum, m) => sum + m.times.length, 0);
+  const result: { date: string; day: string; taken: number; total: number }[] = [];
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split("T")[0];
+    const log = getMedicationLog(patientId, dateStr);
+    const taken = Object.values(log).filter(Boolean).length;
+    result.push({ date: dateStr, day: DAY_NAMES[d.getDay()], taken, total: totalPerDay || 1 });
+  }
+  return result;
+}
+
+export function getAdherenceStreak(patientId: string): number {
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split("T")[0];
+    const log = getMedicationLog(patientId, dateStr);
+    const taken = Object.values(log).filter(Boolean).length;
+    const meds = getMedications(patientId);
+    const total = meds.reduce((sum, m) => sum + m.times.length, 0);
+    if (i === 0 && taken === 0) { streak = 0; continue; }
+    if (total > 0 && taken < total) break;
+    if (total > 0) streak++;
+  }
+  return streak;
+}

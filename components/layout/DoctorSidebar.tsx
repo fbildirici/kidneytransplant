@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, MessageSquare, Calendar, HeartPulse,
-  ChevronLeft, ChevronRight, LogOut, Stethoscope, Activity,
+  ChevronLeft, ChevronRight, LogOut, Stethoscope, Activity, BarChart3,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth, getInitials } from "@/lib/auth-context";
@@ -14,6 +14,7 @@ const navItems = [
   { href: "/doctor/labs",         label: "Laboratuvar", icon: Activity },
   { href: "/doctor/messages",     label: "Mesajlar",    icon: MessageSquare, badge: 3 },
   { href: "/doctor/appointments", label: "Randevular",  icon: Calendar },
+  { href: "/doctor/analytics",    label: "İstatistikler", icon: BarChart3 },
 ];
 
 export default function DoctorSidebar() {

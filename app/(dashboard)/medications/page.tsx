@@ -4,12 +4,12 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
-import { getMedications, setMedications as storeSaveMedications } from "@/lib/store";
+import { getMedications, setMedications as storeSaveMedications, getMedicationLog, saveMedicationLog, getWeeklyAdherence, getAdherenceStreak } from "@/lib/store";
+import { useAuth } from "@/lib/auth-context";
 import {
   Pill, Plus, Check, Clock, Calendar, TrendingUp, Edit2, Trash2, Search, Stethoscope, Save,
 } from "lucide-react";
 import PageTitle from "@/components/PageTitle";
-const MY_PATIENT_ID = "1";
 
 const CRITICAL_DRUG_PATTERNS = [
   "tacrolimus", "prograf", "mycophenolate", "cellcept", "mofetil",
@@ -45,32 +45,26 @@ interface Medication {
   prescribedBy?: string;
 }
 
-const weekDays = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
-
-// Mock weekly adherence data
-const weeklyAdherence = [
-  { day: "Pzt", taken: 5, total: 5 },
-  { day: "Sal", taken: 5, total: 5 },
-  { day: "Çar", taken: 4, total: 5 },
-  { day: "Per", taken: 5, total: 5 },
-  { day: "Cum", taken: 5, total: 5 },
-  { day: "Cmt", taken: 3, total: 5 },
-  { day: "Paz", taken: 2, total: 5 },
-];
-
 const emptyForm = { name: "", dosage: "", frequency: "Günde 2 kez", times: "08:00,20:00", notes: "" };
 
+const TODAY_DATE = new Date().toISOString().split("T")[0];
+
 export default function MedicationsPage() {
+  const { user } = useAuth();
+  const patientId = user?.uid ?? "1";
+
   const [medications, setMedications] = useState<Medication[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingMed, setEditingMed] = useState<Medication | null>(null);
   const [medForm, setMedForm] = useState(emptyForm);
   const [searchQuery, setSearchQuery] = useState("");
   const [todayLog, setTodayLog] = useState<Record<string, boolean>>({});
+  const [weeklyAdherence, setWeeklyAdherence] = useState<{ day: string; taken: number; total: number }[]>([]);
+  const [streak, setStreak] = useState(0);
 
   // Load doctor-prescribed medications from store on mount
   useEffect(() => {
-    const stored = getMedications(MY_PATIENT_ID);
+    const stored = getMedications(patientId);
     const mapped: Medication[] = stored.map((m, i) => ({
       id: m.id, name: m.name, dosage: m.dosage, frequency: m.frequency,
       times: m.times, notes: m.notes, active: m.active,
@@ -78,14 +72,21 @@ export default function MedicationsPage() {
       prescribedBy: m.prescribedBy,
     }));
     setMedications(mapped);
-    // Initialize today log with all false
+    // Load persisted today log
+    const persistedLog = getMedicationLog(patientId, TODAY_DATE);
     const log: Record<string, boolean> = {};
-    mapped.forEach((med) => med.times.forEach((t) => { log[`${med.id}-${t}`] = false; }));
+    mapped.forEach((med) => med.times.forEach((t) => { log[`${med.id}-${t}`] = persistedLog[`${med.id}-${t}`] ?? false; }));
     setTodayLog(log);
-  }, []);
+    setWeeklyAdherence(getWeeklyAdherence(patientId));
+    setStreak(getAdherenceStreak(patientId));
+  }, [patientId]);
 
   const toggleTaken = (key: string) => {
-    setTodayLog((prev) => ({ ...prev, [key]: !prev[key] }));
+    setTodayLog((prev) => {
+      const updated = { ...prev, [key]: !prev[key] };
+      saveMedicationLog(patientId, TODAY_DATE, updated);
+      return updated;
+    });
   };
 
   const openAddModal = () => {
@@ -108,8 +109,8 @@ export default function MedicationsPage() {
         m.id === editingMed.id ? { ...m, ...medForm, times } : m
       );
       setMedications(updated);
-      storeSaveMedications(MY_PATIENT_ID, updated.map((m) => ({
-        id: m.id, patientId: MY_PATIENT_ID, name: m.name, dosage: m.dosage,
+      storeSaveMedications(patientId, updated.map((m) => ({
+        id: m.id, patientId: patientId, name: m.name, dosage: m.dosage,
         frequency: m.frequency, times: m.times, notes: m.notes,
         prescribedBy: m.prescribedBy || "Hasta", prescribedDate: new Date().toISOString().split("T")[0], active: m.active,
       })));
@@ -121,8 +122,8 @@ export default function MedicationsPage() {
       };
       const updated = [...medications, newMed];
       setMedications(updated);
-      storeSaveMedications(MY_PATIENT_ID, updated.map((m) => ({
-        id: m.id, patientId: MY_PATIENT_ID, name: m.name, dosage: m.dosage,
+      storeSaveMedications(patientId, updated.map((m) => ({
+        id: m.id, patientId: patientId, name: m.name, dosage: m.dosage,
         frequency: m.frequency, times: m.times, notes: m.notes,
         prescribedBy: m.prescribedBy || "Hasta", prescribedDate: new Date().toISOString().split("T")[0], active: m.active,
       })));
@@ -136,8 +137,8 @@ export default function MedicationsPage() {
   const deleteMedication = (id: string) => {
     const updated = medications.filter((m) => m.id !== id);
     setMedications(updated);
-    storeSaveMedications(MY_PATIENT_ID, updated.map((m) => ({
-      id: m.id, patientId: MY_PATIENT_ID, name: m.name, dosage: m.dosage,
+    storeSaveMedications(patientId, updated.map((m) => ({
+      id: m.id, patientId: patientId, name: m.name, dosage: m.dosage,
       frequency: m.frequency, times: m.times, notes: m.notes,
       prescribedBy: m.prescribedBy || "Hasta", prescribedDate: "", active: m.active,
     })));
@@ -225,10 +226,9 @@ export default function MedicationsPage() {
             <div className="w-11 h-11 rounded-[var(--radius-lg)] bg-navy-500 flex items-center justify-center shadow-subtle">
               <Calendar className="text-white" size={19} />
             </div>
-            <span className="text-xs font-semibold text-warning-600 bg-warning-50 border border-warning-200 px-2 py-0.5 rounded-full">Demo</span>
           </div>
           <p className="text-xs font-semibold text-navy-600/70 uppercase tracking-wide mb-0.5">Gün Serisi</p>
-          <p className="text-3xl font-bold text-navy-700">12</p>
+          <p className="text-3xl font-bold text-navy-700">{streak}</p>
         </div>
       </div>
 
@@ -236,7 +236,6 @@ export default function MedicationsPage() {
       <Card>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-text-primary">Haftalık İlaç Uyumu</h2>
-          <span className="text-xs font-semibold text-warning-600 bg-warning-50 border border-warning-200 px-2 py-0.5 rounded-full">Örnek veri</span>
         </div>
         <div className="flex items-end justify-between gap-2 h-32">
           {weeklyAdherence.map((day) => {

@@ -282,6 +282,9 @@ export default function DoctorDashboard() {
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    <Link href={`/doctor/patients/${selectedPatient.id}`} className="rounded-[var(--radius-lg)] bg-navy-600 text-white px-3 py-2 text-xs font-semibold hover:bg-navy-700 transition-colors">
+                      Detay Sayfası
+                    </Link>
                     <Link href="/doctor/labs" className="rounded-[var(--radius-lg)] bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-700">
                       Lab Gir
                     </Link>
